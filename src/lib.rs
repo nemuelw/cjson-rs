@@ -17,3 +17,7 @@ pub const IS_REFERENCE: u32 = bindings::cJSON_IsReference;
 pub const STRING_IS_CONST: u32 = bindings::cJSON_StringIsConst;
 pub const NESTING_LIMIT: u32 = bindings::CJSON_NESTING_LIMIT;
 pub const CIRCULAR_LIMIT: u32 = bindings::CJSON_CIRCULAR_LIMIT;
+
+pub fn cjson_version() -> String {
+    format!("{}.{}.{}", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+}
