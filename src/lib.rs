@@ -21,18 +21,42 @@ pub enum JsonType {
     Raw = 128,
 }
 
+/// Get the version of the underlying cJSON library
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::cjson_version;
+///
+/// fn main() {
+///     assert_eq!(cjson_version(), "1.7.18");
+/// }
+/// ```
 pub fn cjson_version() -> String {
     format!("{}.{}.{}", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 }
 
+/// Struct for managing custom memory allocation and deallocation functions
+///
+/// Fields:
+/// - `malloc_fn`: Optional function pointer for custom memory allocation
+/// - `free_fn`: Option function pointer for custom memory deallocation
+///
+/// To create a new instance of `Hooks`, use its `new` method:
+/// ```rust
+/// let hooks = Hooks::new(Some(custom_malloc), Some(custom_free));
+/// ```
+///
+/// To initialize hooks, use its `init` method:
+/// ```rust
+/// hooks.init();
+/// ```
 pub struct Hooks {
     pub malloc_fn: Option<fn(sz: usize) -> *mut libc::c_void>,
     pub free_fn: Option<fn(*mut libc::c_void)>,
 }
 
 impl Hooks {
-    /// Create new instance of the Hooks struct with optional custom `malloc`
-    /// and `free` functions.
+    /// Create new instance of the Hooks struct
     ///
     /// If no functions are provided (passing `None` to the constructor), the
     /// cJSON library will use the default `malloc` and `free` functions from C.
