@@ -204,11 +204,17 @@ impl Json {
             Err(JsonError::PrintError)
         }
     }
+
+    // delete a JSON entity and all its subentities
+    fn delete(&self) {
+        unsafe { cJSON_Delete(self as *const Json as *mut cJSON) };
+    }
 }
 
 pub trait JsonPtrExt {
     fn print(&self) -> Result<String, JsonError>;
     fn print_unformatted(&self) -> Result<String, JsonError>;
+    fn delete(&self);
 }
 
 impl JsonPtrExt for *mut Json {
@@ -274,6 +280,21 @@ impl JsonPtrExt for *mut Json {
             Some(json) => json.print_unformatted(),
             None => Err(JsonError::NullPointer),
         }
+    }
+
+    /// Delete a JSON entity and all its subentities.
+    ///
+    /// Example:
+    /// ```rust
+    /// use cjson_rs::*;
+    ///
+    /// fn main() {
+    ///     let json: *mut Json = create_object();
+    ///     json.delete();
+    /// }
+    /// ```
+    fn delete(&self) {
+        unsafe { self.as_mut().map(|json| json.delete()) };
     }
 }
 
