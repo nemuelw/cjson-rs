@@ -9,7 +9,7 @@ pub const STRING_IS_CONST: u32 = 512;
 pub const NESTING_LIMIT: u32 = 1000;
 pub const CIRCULAR_LIMIT: u32 = 10000;
 
-pub enum JsonType {
+pub enum JsonValueType {
     Invalid = 0,
     False = 1,
     True = 2,
@@ -136,4 +136,26 @@ impl Hooks {
             cJSON_InitHooks(&mut self.to_cjson_hooks());
         }
     }
+}
+
+/// Rust binding for the underlying `cJSON` struct from the C library
+///
+/// Fields:
+/// - `next`: pointer to the next `cJSON` object in a linked list
+/// - `prev`: pointer to the previous `cJSON` object in a linked list
+/// - `child`: array or object item will have a child pointing to a chain of items in the array or object
+/// - `type`: the type of the JSON value eg. `JsonValueType.Number`, `JsonValueType.Array`
+/// - `valuestring`: pointer to the string value if the type is a string (and raw)
+/// - `valueint`: writing to this is deprecated. Use the `set_number_value` method instead
+/// - `valuedouble`: double precision floating point value if the type is `JsonValueType.Number`
+/// - `string`: pointer to the key string (used when this `cJSON` object is part of an object)
+pub struct CJson {
+    pub next: *mut CJson,
+    pub prev: *mut CJson,
+    pub child: *mut CJson,
+    pub type_: i32,
+    pub valuestring: *mut i8,
+    pub valueint: i32,
+    pub valuedouble: f64,
+    pub string: *mut i8,
 }
