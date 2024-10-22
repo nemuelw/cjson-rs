@@ -219,6 +219,18 @@ impl Json {
         }
     }
 
+    // generate a string representation of the JSON object using a preallocated buffer
+    fn print_preallocated(&self, buffer: *mut i8, length: i32, format: bool) -> bool {
+        unsafe {
+            cJSON_PrintPreallocated(
+                self as *const Json as *mut cJSON,
+                buffer,
+                length,
+                if format { 1 } else { 0 },
+            ) == 1
+        }
+    }
+
     // generate unformatted string representation of the JSON object
     fn print_unformatted(&self) -> Result<String, JsonError> {
         let c_str = unsafe { cJSON_PrintUnformatted(self as *const Json as *const cJSON) };
@@ -239,7 +251,12 @@ impl Json {
 pub trait JsonPtrExt {
     fn print(&self) -> Result<String, JsonError>;
     fn print_buffered(&self, prebuffer: i32, fmt: bool) -> Result<String, JsonError>;
-    // fn print_preallocated(&self, buffer: *mut i8, length: i32, format: bool) -> bool;
+    fn print_preallocated(
+        &self,
+        buffer: *mut i8,
+        length: i32,
+        format: bool,
+    ) -> Result<(), JsonError>;
     fn print_unformatted(&self) -> Result<String, JsonError>;
     fn delete(&self);
 }
@@ -286,7 +303,8 @@ impl JsonPtrExt for *mut Json {
     /// Returns:
     /// - `Ok(String)` - if the buffer allocation and string generation go well.
     /// - `Err(JsonError::NullPointer)` - if the pointer is null.
-    /// - `Err(JsonError::PrintBufferedError)` - if an error occurs during allocation and/or string generation.
+    /// - `Err(JsonError::PrintBufferedError)` - if an error occurs during allocation and/or string
+    /// generation.
     ///
     /// Example:
     /// ```rust
@@ -303,6 +321,57 @@ impl JsonPtrExt for *mut Json {
     fn print_buffered(&self, prebuffer: i32, fmt: bool) -> Result<String, JsonError> {
         match unsafe { self.as_mut() } {
             Some(json) => json.print_buffered(prebuffer, fmt),
+            None => Err(JsonError::NullPointer),
+        }
+    }
+
+    /// Generate a string representation of the JSON object into a preallocated buffer.
+    ///
+    /// Args:
+    /// - `buffer: *mut i8`: Preallocated buffer where the generated string will be stored.
+    /// - `length: i32`: Number of bytes to write (preferably equal to the size of the allocated buffer).
+    /// - `format: bool`: Whether or not to have the output formatted/pretty-printed.
+    ///
+    /// Returns:
+    /// - `Ok(())` - if all goes well.
+    /// - `Err(NullPointer)` - if the pointer is null.
+    /// - `Err(PrintPreallocatedError)` - if an error occurs during the string generation or copying
+    /// into the buffer.
+    ///
+    /// Example:
+    /// ```rust
+    /// use cjson_rs::*;
+    /// use libc::malloc;
+    /// use std::ffi::CStr;
+    ///
+    /// fn main() {
+    ///     let json: *mut Json = create_object();
+    ///     let buffer: *mut i8 = unsafe { malloc(8) as *mut i8 };
+    ///     match json.print_preallocated(buffer, 8, false) {
+    ///         Ok(_) => unsafe {
+    ///             let c_str = CStr::from_ptr(buffer);
+    ///            let result = c_str.to_str().unwrap_or_default().to_string();
+    ///             assert_eq!(result, "{}");
+    ///             println!("Test passed!");
+    ///         },
+    ///         Err(err) => eprintln!("{}", err),
+    ///     }
+    /// }
+    /// ```
+    fn print_preallocated(
+        &self,
+        buffer: *mut i8,
+        length: i32,
+        format: bool,
+    ) -> Result<(), JsonError> {
+        match unsafe { self.as_mut() } {
+            Some(json) => {
+                if json.print_preallocated(buffer, length, format) {
+                    Ok(())
+                } else {
+                    Err(JsonError::PrintPreallocatedError)
+                }
+            }
             None => Err(JsonError::NullPointer),
         }
     }
