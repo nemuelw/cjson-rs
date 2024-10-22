@@ -193,10 +193,22 @@ impl Json {
             Err(JsonError::PrintError)
         }
     }
+
+    // generate unformatted string representation of the JSON object
+    fn print_unformatted(&self) -> Result<String, JsonError> {
+        let c_str = unsafe { cJSON_PrintUnformatted(self as *const Json as *const cJSON) };
+        if !c_str.is_null() {
+            let c_str_ref = unsafe { CStr::from_ptr(c_str) };
+            Ok(c_str_ref.to_str().unwrap_or_default().to_string())
+        } else {
+            Err(JsonError::PrintError)
+        }
+    }
 }
 
 pub trait JsonPtrExt {
     fn print(&self) -> Result<String, JsonError>;
+    fn print_unformatted(&self) -> Result<String, JsonError>;
 }
 
 impl JsonPtrExt for *mut Json {
@@ -228,6 +240,38 @@ impl JsonPtrExt for *mut Json {
     fn print(&self) -> Result<String, JsonError> {
         match unsafe { self.as_mut() } {
             Some(json) => json.print(),
+            None => Err(JsonError::NullPointer),
+        }
+    }
+
+    /// Generate an **unformatted** string representation of the JSON object eg.
+    /// ```json
+    /// {
+    ///     "name": "Nemuel",
+    ///     "age": 20
+    /// }
+    /// ```
+    ///
+    /// Returns:
+    /// - `Ok(String)` - if the JSON object's string representation is successfully generated.
+    /// - `Err(JsonError::NullPointer)` - if the pointer is null.
+    /// - `Err(JsonError::PrintError)` - if the string generation fails.
+    ///
+    /// Example:
+    /// ```rust
+    /// use cjson_rs::*;
+    ///
+    /// fn main() {
+    ///     let json: *mut Json = create_object();
+    ///     match json.print() {
+    ///         Ok(result) => assert_eq!(result, "{\n}"),
+    ///         Err(err) => eprintln!("{}", err),
+    ///     }
+    /// }
+    /// ```
+    fn print_unformatted(&self) -> Result<String, JsonError> {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.print_unformatted(),
             None => Err(JsonError::NullPointer),
         }
     }
