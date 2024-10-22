@@ -1,5 +1,6 @@
 mod bindings;
 use bindings::*;
+use std::ffi::CStr;
 
 pub const VERSION_MAJOR: u32 = bindings::CJSON_VERSION_MAJOR;
 pub const VERSION_MINOR: u32 = bindings::CJSON_VERSION_MINOR;
@@ -21,7 +22,7 @@ pub enum JsonValueType {
     Raw = 128,
 }
 
-/// Get the version of the underlying cJSON library
+/// Get the version of the underlying cJSON library.
 ///
 /// Example:
 /// ```rust
@@ -35,11 +36,11 @@ pub fn cjson_version() -> String {
     format!("{}.{}.{}", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
 }
 
-/// Struct for managing custom memory allocation and deallocation functions
+/// Struct for managing custom memory allocation and deallocation functions.
 ///
 /// Fields:
-/// - `malloc_fn`: Optional function pointer for custom memory allocation
-/// - `free_fn`: Option function pointer for custom memory deallocation
+/// - `malloc_fn`: Optional function pointer for custom memory allocation.
+/// - `free_fn`: Optional function pointer for custom memory deallocation.
 ///
 /// To create a new instance of `Hooks`, use its `new` method:
 /// ```rust
@@ -56,7 +57,7 @@ pub struct Hooks {
 }
 
 impl Hooks {
-    /// Create new instance of the Hooks struct
+    /// Create new instance of the Hooks struct.
     ///
     /// If no functions are provided (passing `None` to the constructor), the
     /// cJSON library will use the default `malloc` and `free` functions from C.
@@ -124,7 +125,7 @@ impl Hooks {
         }
     }
 
-    /// Initialize the custom memory management hooks
+    /// Initialize the custom memory management hooks.
     ///
     /// Usage:
     /// ```rust
@@ -138,24 +139,110 @@ impl Hooks {
     }
 }
 
-/// Rust binding for the underlying `cJSON` struct from the C library
+/// Rust binding for the underlying `cJSON` struct from the C library.
 ///
 /// Fields:
-/// - `next`: pointer to the next `cJSON` object in a linked list
-/// - `prev`: pointer to the previous `cJSON` object in a linked list
-/// - `child`: array or object item will have a child pointing to a chain of items in the array or object
-/// - `type`: the type of the JSON value eg. `JsonValueType.Number`, `JsonValueType.Array`
-/// - `valuestring`: pointer to the string value if the type is a string (and raw)
-/// - `valueint`: writing to this is deprecated. Use the `set_number_value` method instead
-/// - `valuedouble`: double precision floating point value if the type is `JsonValueType.Number`
-/// - `string`: pointer to the key string (used when this `cJSON` object is part of an object)
-pub struct CJson {
-    pub next: *mut CJson,
-    pub prev: *mut CJson,
-    pub child: *mut CJson,
+/// - `next`: Pointer to the next `cJSON` object in a linked list.
+/// - `prev`: Pointer to the previous `cJSON` object in a linked list.
+/// - `child`: An array or object item will have a child pointing to a chain of items in the array or object.
+/// - `type`: The type of the JSON value eg. `JsonValueType.Number`, `JsonValueType.Array`.
+/// - `valuestring`: Pointer to the string value if the type is a string (and raw).
+/// - `valueint`: Writing to this is deprecated. Use the `set_number_value` method instead.
+/// - `valuedouble`: Double precision floating point value if the type is `JsonValueType.Number`.
+/// - `string`: Pointer to the key string (used when this `cJSON` object is part of an object).
+#[repr(C)]
+pub struct Json {
+    pub next: *mut Json,
+    pub prev: *mut Json,
+    pub child: *mut Json,
     pub type_: i32,
     pub valuestring: *mut i8,
     pub valueint: i32,
     pub valuedouble: f64,
     pub string: *mut i8,
+}
+
+/// Errors that can occur when working with Json objects.
+///
+/// Each variant indicates a specific kind of error can occur in these operations.
+#[derive(Debug)]
+pub enum JsonError {
+    NullPointer,
+    PrintError,
+}
+
+impl std::fmt::Display for JsonError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            JsonError::NullPointer => write!(f, "the JSON pointer is null"),
+            JsonError::PrintError => write!(f, "failed to print the JSON object"),
+        }
+    }
+}
+
+impl std::error::Error for JsonError {}
+
+impl Json {
+    // generate a string representation of the JSON object
+    fn print(&self) -> Result<String, JsonError> {
+        let c_str = unsafe { cJSON_Print(self as *const Json as *const cJSON) };
+        if !c_str.is_null() {
+            let c_str_ref = unsafe { CStr::from_ptr(c_str) };
+            Ok(c_str_ref.to_str().unwrap_or_default().to_string())
+        } else {
+            Err(JsonError::PrintError)
+        }
+    }
+}
+
+pub trait JsonPtrExt {
+    fn print(&self) -> Result<String, JsonError>;
+}
+
+impl JsonPtrExt for *mut Json {
+    /// Generate a string representation of the JSON object eg.
+    /// ```json
+    /// {
+    ///     "name": "Nemuel",
+    ///     "age": 20
+    /// }
+    /// ```
+    ///
+    /// Returns:
+    /// - `Ok(String)` - if the JSON object's string representation is successfully generated.
+    /// - `Err(JsonError::NullPointer)` - if the pointer is null.
+    /// - `Err(JsonError::PrintError)` - if the string generation fails.
+    ///
+    /// Example:
+    /// ```rust
+    /// use cjson_rs::*;
+    ///
+    /// fn main() {
+    ///     let json: *mut Json = create_object();
+    ///     match json.print() {
+    ///         Ok(result) => assert_eq!(result, "{\n}"),
+    ///         Err(err) => eprintln!("{}", err),
+    ///     }
+    /// }
+    /// ```
+    fn print(&self) -> Result<String, JsonError> {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.print(),
+            None => Err(JsonError::NullPointer),
+        }
+    }
+}
+
+/// Create a new JSON object (instance of the Json struct).
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::{create_object, Json};
+///
+/// fn main() {
+///     let json: *mut Json = create_object();
+/// }
+/// ```
+pub fn create_object() -> *mut Json {
+    unsafe { cJSON_CreateObject() as *mut Json }
 }
