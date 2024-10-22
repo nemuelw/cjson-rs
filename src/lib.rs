@@ -169,6 +169,8 @@ pub struct Json {
 pub enum JsonError {
     NullPointer,
     PrintError,
+    PrintBufferedError,
+    PrintPreallocatedError,
 }
 
 impl std::fmt::Display for JsonError {
@@ -176,6 +178,12 @@ impl std::fmt::Display for JsonError {
         match self {
             JsonError::NullPointer => write!(f, "the JSON pointer is null"),
             JsonError::PrintError => write!(f, "failed to print the JSON object"),
+            JsonError::PrintBufferedError => {
+                write!(f, "failed to print the JSON object to allocated buffer")
+            }
+            JsonError::PrintPreallocatedError => {
+                write!(f, "failed to print the JSON object to preallocated buffer")
+            }
         }
     }
 }
@@ -191,6 +199,23 @@ impl Json {
             Ok(c_str_ref.to_str().unwrap_or_default().to_string())
         } else {
             Err(JsonError::PrintError)
+        }
+    }
+
+    // generate a string representation of the JSON object with dynamic buffer resizing
+    fn print_buffered(&self, prebuffer: i32, fmt: bool) -> Result<String, JsonError> {
+        let c_str = unsafe {
+            cJSON_PrintBuffered(
+                self as *const Json as *const cJSON,
+                prebuffer,
+                if fmt { 1 } else { 0 },
+            )
+        };
+        if !c_str.is_null() {
+            let c_str_ref = unsafe { CStr::from_ptr(c_str) };
+            Ok(c_str_ref.to_str().unwrap_or_default().to_string())
+        } else {
+            Err(JsonError::PrintBufferedError)
         }
     }
 
@@ -213,6 +238,8 @@ impl Json {
 
 pub trait JsonPtrExt {
     fn print(&self) -> Result<String, JsonError>;
+    fn print_buffered(&self, prebuffer: i32, fmt: bool) -> Result<String, JsonError>;
+    // fn print_preallocated(&self, buffer: *mut i8, length: i32, format: bool) -> bool;
     fn print_unformatted(&self) -> Result<String, JsonError>;
     fn delete(&self);
 }
@@ -246,6 +273,36 @@ impl JsonPtrExt for *mut Json {
     fn print(&self) -> Result<String, JsonError> {
         match unsafe { self.as_mut() } {
             Some(json) => json.print(),
+            None => Err(JsonError::NullPointer),
+        }
+    }
+
+    /// Generate a string representation of the JSON object with dynamic buffer resizing.
+    ///
+    /// Args:
+    /// - `prebuffer: i32`: Size of buffer to start with.
+    /// - `fmt: bool`: Whether or not to have the output formatted/pretty-printed.
+    ///
+    /// Returns:
+    /// - `Ok(String)` - if the buffer allocation and string generation go well.
+    /// - `Err(JsonError::NullPointer)` - if the pointer is null.
+    /// - `Err(JsonError::PrintBufferedError)` - if an error occurs during allocation and/or string generation.
+    ///
+    /// Example:
+    /// ```rust
+    /// use cjson_rs::*;
+    ///
+    /// fn main() {
+    ///     let json: *mut Json = create_object();
+    ///     match json.print_buffered(8, false) {
+    ///         Ok(result) => assert_eq!(result, "{}"),
+    ///         Err(err) => eprintln!("{}", err),
+    ///     }
+    /// }
+    /// ```
+    fn print_buffered(&self, prebuffer: i32, fmt: bool) -> Result<String, JsonError> {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.print_buffered(prebuffer, fmt),
             None => Err(JsonError::NullPointer),
         }
     }
