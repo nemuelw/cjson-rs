@@ -754,10 +754,30 @@ pub fn cjson_create_raw(raw: String) -> Result<*mut Json, JsonError> {
 /// use cjson_rs::*;
 ///
 /// fn main() {
-///     let json = cjson_create_raw("\"count\": 5".to_string()).unwrap();
-///     println!("{}", json.print().unwrap()); // output: "count": 5
+///     let json = cjson_create_null();
+///     assert_eq!(json.is_type_null(), true);
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_create_null() -> *mut Json {
     unsafe { cJSON_CreateNull() as *mut Json }
+}
+
+/// Create Json item of type `True`.
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `True`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_true();
+///     assert_eq!(json.is_type_true(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_true() -> *mut Json {
+    unsafe { cJSON_CreateTrue() as *mut Json }
 }
