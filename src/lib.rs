@@ -1,6 +1,6 @@
 mod bindings;
 use bindings::*;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString, NulError};
 
 pub const VERSION_MAJOR: u32 = bindings::CJSON_VERSION_MAJOR;
 pub const VERSION_MINOR: u32 = bindings::CJSON_VERSION_MINOR;
@@ -167,7 +167,10 @@ pub struct Json {
 /// Each variant indicates a specific kind of error can occur in these operations.
 #[derive(Debug)]
 pub enum JsonError {
+    CStringError(NulError),
+    EmptyStringError,
     NullPointer,
+    ParseError,
     PrintError,
     PrintBufferedError,
     PrintPreallocatedError,
@@ -176,7 +179,10 @@ pub enum JsonError {
 impl std::fmt::Display for JsonError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            JsonError::CStringError(err) => write!(f, "CString error: {}", err),
+            JsonError::EmptyStringError => write!(f, "you provided an empty string"),
             JsonError::NullPointer => write!(f, "the JSON pointer is null"),
+            JsonError::ParseError => write!(f, "failed to parse the JSON string"),
             JsonError::PrintError => write!(f, "failed to print the JSON object"),
             JsonError::PrintBufferedError => {
                 write!(f, "failed to print the JSON object to allocated buffer")
@@ -436,4 +442,33 @@ impl JsonPtrExt for *mut Json {
 /// ```
 pub fn create_object() -> *mut Json {
     unsafe { cJSON_CreateObject() as *mut Json }
+}
+
+/// Parse a JSON string into a Json object.
+///
+/// Args:
+/// - `value: String`: The JSON string to be parsed. Providing an empty string will result in
+/// JsonError::EmptyStringError.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - if the parsing happens successfully.
+/// - `Err(JsonError::EmptyStringError)` - if the provided `value` string is empty (can't parse an
+/// empty string).
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+pub fn parse_json(value: String) -> Result<*mut Json, JsonError> {
+    if value.is_empty() {
+        return Err(JsonError::EmptyStringError);
+    }
+
+    match CString::new(value) {
+        Ok(c_str) => {
+            let json = unsafe { cJSON_Parse(c_str.as_ptr()) };
+            if json.is_null() {
+                Err(JsonError::ParseError)
+            } else {
+                Ok(json as *mut Json)
+            }
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
 }
