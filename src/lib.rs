@@ -874,3 +874,22 @@ pub fn cjson_create_string(string: String) -> Result<*mut Json, JsonError> {
         Err(err) => Err(JsonError::CStringError(err)),
     }
 }
+
+/// Create Json item of type `Array`.
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_array();
+///     assert_eq!(json.is_type_array(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_array() -> *mut Json {
+    unsafe { cJSON_CreateArray() as *mut Json }
+}
