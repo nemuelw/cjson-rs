@@ -715,3 +715,31 @@ pub fn cjson_parse_json_with_length(
         Err(err) => Err(JsonError::CStringError(err)),
     }
 }
+
+/// Create Json item of type `Raw`.
+///
+/// Args:
+/// - `raw: String` - raw string, JSON or otherwise.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the created Json item of type `Raw`.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_raw("\"count\": 5".to_string()).unwrap();
+///     println!("{}", json.print().unwrap()); // output: "count": 5
+/// }
+/// ```
+pub fn cjson_create_raw(raw: String) -> Result<*mut Json, JsonError> {
+    match CString::new(raw) {
+        Ok(c_str) => {
+            let json = unsafe { cJSON_CreateRaw(c_str.as_ptr()) as *mut Json };
+            Ok(json)
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
