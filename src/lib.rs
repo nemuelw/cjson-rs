@@ -989,3 +989,28 @@ pub fn cjson_create_object_reference(child: *mut Json) -> Result<*mut Json, Json
         Ok(reference)
     }
 }
+
+/// Create Json item of type `Array` containing integers.
+///
+/// Args:
+/// - `numbers: *const i32` - Pointer to a signed 32-bit integer (start of the numbers array).
+/// - `count: i32` - Number of array elements to include in the `Array` being create (typically just the
+/// size of the `numbers` array).
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `Array` containing integers.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+/// 
+/// fn main() {
+///     let numbers: [i32; 5] = [1, 2, 3, 4, 5];
+///     let json = cjson_create_int_array(&numbers[0], numbers.len() as i32);
+///     assert_eq!(json.is_type_array(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_int_array(numbers: *const i32, count: i32) -> *mut Json {
+    unsafe { cJSON_CreateIntArray(numbers, count) as *mut Json }
+}
