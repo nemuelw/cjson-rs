@@ -455,7 +455,7 @@ impl JsonPtrExt for *mut Json {
     /// use cjson_rs::*;
     ///
     /// fn main() {
-    ///     let json: *mut Json = create_object();
+    ///     let json: *mut Json = cjson_create_object();
     ///     match json.print() {
     ///         Ok(result) => assert_eq!(result, "{\n}"),
     ///         Err(err) => eprintln!("{}", err),
@@ -486,7 +486,7 @@ impl JsonPtrExt for *mut Json {
     /// use cjson_rs::*;
     ///
     /// fn main() {
-    ///     let json: *mut Json = create_object();
+    ///     let json: *mut Json = cjson_create_object();
     ///     match json.print_buffered(8, false) {
     ///         Ok(result) => assert_eq!(result, "{}"),
     ///         Err(err) => eprintln!("{}", err),
@@ -520,7 +520,7 @@ impl JsonPtrExt for *mut Json {
     /// use std::ffi::CStr;
     ///
     /// fn main() {
-    ///     let json: *mut Json = create_object();
+    ///     let json: *mut Json = cjson_create_object();
     ///     let buffer: *mut i8 = unsafe { malloc(8) as *mut i8 };
     ///     match json.print_preallocated(buffer, 8, false) {
     ///         Ok(_) => unsafe {
@@ -569,7 +569,7 @@ impl JsonPtrExt for *mut Json {
     /// use cjson_rs::*;
     ///
     /// fn main() {
-    ///     let json: *mut Json = create_object();
+    ///     let json: *mut Json = cjson_create_object();
     ///     match json.print() {
     ///         Ok(result) => assert_eq!(result, "{\n}"),
     ///         Err(err) => eprintln!("{}", err),
@@ -590,27 +590,13 @@ impl JsonPtrExt for *mut Json {
     /// use cjson_rs::*;
     ///
     /// fn main() {
-    ///     let json: *mut Json = create_object();
+    ///     let json: *mut Json = cjson_create_object();
     ///     json.delete();
     /// }
     /// ```
     fn delete(&self) {
         unsafe { self.as_mut().map(|json| json.delete()) };
     }
-}
-
-/// Create a new JSON object (instance of the Json struct).
-///
-/// Example:
-/// ```rust
-/// use cjson_rs::{create_object, Json};
-///
-/// fn main() {
-///     let json: *mut Json = create_object();
-/// }
-/// ```
-pub fn cjson_create_object() -> *mut Json {
-    unsafe { cJSON_CreateObject() as *mut Json }
 }
 
 /// Parse a JSON string into a Json object.
@@ -763,6 +749,20 @@ pub fn cjson_create_null() -> *mut Json {
     unsafe { cJSON_CreateNull() as *mut Json }
 }
 
+/// Create a new JSON object (instance of the Json struct).
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::{cjson_create_object, Json};
+///
+/// fn main() {
+///     let json: *mut Json = cjson_cjson_create_object();
+/// }
+/// ```
+pub fn cjson_create_object() -> *mut Json {
+    unsafe { cJSON_CreateObject() as *mut Json }
+}
+
 /// Create Json item of type `True`.
 ///
 /// Returns:
@@ -853,7 +853,7 @@ pub fn cjson_create_number(num: f64) -> *mut Json {
 /// Returns:
 /// - `*mut Json` - a mutable pointer to the created Json item of type `String`.
 /// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
-/// 
+///
 ///
 /// Example:
 /// ```rust
