@@ -168,6 +168,7 @@ pub struct Json {
 pub enum JsonError {
     CStringError(NulError),
     EmptyStringError,
+    InvalidTypeError(String),
     NullPointer,
     ParseError,
     PrintError,
@@ -180,6 +181,7 @@ impl std::fmt::Display for JsonError {
         match self {
             JsonError::CStringError(err) => write!(f, "CString error: {}", err),
             JsonError::EmptyStringError => write!(f, "you provided an empty string"),
+            JsonError::InvalidTypeError(err) => write!(f, "InvalidType error: {}", err),
             JsonError::NullPointer => write!(f, "the JSON pointer is null"),
             JsonError::ParseError => write!(f, "failed to parse the JSON string"),
             JsonError::PrintError => write!(f, "failed to print the JSON object"),
@@ -923,5 +925,67 @@ pub fn cjson_create_string_reference(string: String) -> Result<*mut Json, JsonEr
             Ok(json)
         }
         Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
+/// Create Json item of type `Array` that doesn't "own" its content.
+///
+/// Args:
+/// - `child: *mut Json`: Json item of type `Array` to create a reference to.
+///
+/// Returns:
+/// - `*mut Json` - a reference to the provided Json item of type `Array`.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the provided Json item is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let child = cjson_create_array();
+///     let reference = cjson_create_array_reference(child).unwrap();
+///     assert_eq!(reference.is_type_array(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_array_reference(child: *mut Json) -> Result<*mut Json, JsonError> {
+    if !child.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot create array reference to a non-array Json item".to_string(),
+        ))
+    } else {
+        let reference = unsafe { cJSON_CreateArrayReference(child as *mut cJSON) as *mut Json };
+        Ok(reference)
+    }
+}
+
+/// Create Json item of type `Array` that doesn't "own" its content.
+///
+/// Args:
+/// - `child: *mut Json`: Json item of type `Array` to create a reference to.
+///
+/// Returns:
+/// - `*mut Json` - a reference to the provided Json item of type `Array`.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the provided Json item is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let child = cjson_create_object();
+///     let reference = cjson_create_object_reference(child).unwrap();
+///     assert_eq!(reference.is_type_object(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_object_reference(child: *mut Json) -> Result<*mut Json, JsonError> {
+    if !child.is_type_object() {
+        Err(JsonError::InvalidTypeError(
+            "cannot create object reference to a non-object Json item".to_string(),
+        ))
+    } else {
+        let reference = unsafe { cJSON_CreateObjectReference(child as *mut cJSON) as *mut Json };
+        Ok(reference)
     }
 }
