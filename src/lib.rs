@@ -81,7 +81,6 @@ impl Hooks {
     ///     let _: Hooks = Hooks::new(Some(custom_malloc), Some(custom_free));
     ///     let _: Hooks = Hooks::new(None, None); // the default C functions will be used
     /// }
-    ///
     /// ```
     pub fn new(
         malloc_fn: Option<fn(usize) -> *mut libc::c_void>,
@@ -610,7 +609,7 @@ impl JsonPtrExt for *mut Json {
 ///     let json: *mut Json = create_object();
 /// }
 /// ```
-pub fn create_object() -> *mut Json {
+pub fn cjson_create_object() -> *mut Json {
     unsafe { cJSON_CreateObject() as *mut Json }
 }
 
@@ -646,7 +645,7 @@ pub fn create_object() -> *mut Json {
 ///     "age":  20
 /// }
 /// ```
-pub fn parse_json(value: String) -> Result<*mut Json, JsonError> {
+pub fn cjson_parse_json(value: String) -> Result<*mut Json, JsonError> {
     if value.is_empty() {
         return Err(JsonError::EmptyStringError);
     }
@@ -696,7 +695,10 @@ pub fn parse_json(value: String) -> Result<*mut Json, JsonError> {
 ///     "rps": 500
 /// }
 /// ```
-pub fn parse_json_with_length(value: String, buffer_length: usize) -> Result<*mut Json, JsonError> {
+pub fn cjson_parse_json_with_length(
+    value: String,
+    buffer_length: usize,
+) -> Result<*mut Json, JsonError> {
     if value.is_empty() {
         return Err(JsonError::EmptyStringError);
     }
