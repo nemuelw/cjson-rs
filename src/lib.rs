@@ -455,6 +455,27 @@ pub fn create_object() -> *mut Json {
 /// - `Err(JsonError::EmptyStringError)` - if the provided `value` string is empty (can't parse an
 /// empty string).
 /// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let value  = "{\"name\":\"Nemuel\", \"age\":20}".to_string();
+///     match parse_json(value) {
+///         Ok(json) => println!("{}", json.print().unwrap()),
+///         Err(err) => eprintln!("{}", err),
+///     }
+/// }
+/// ```
+///
+/// Output:
+/// ```json
+/// {
+///     "name": "Nemuel",
+///     "age":  20
+/// }
+/// ```
 pub fn parse_json(value: String) -> Result<*mut Json, JsonError> {
     if value.is_empty() {
         return Err(JsonError::EmptyStringError);
@@ -463,6 +484,56 @@ pub fn parse_json(value: String) -> Result<*mut Json, JsonError> {
     match CString::new(value) {
         Ok(c_str) => {
             let json = unsafe { cJSON_Parse(c_str.as_ptr()) };
+            if json.is_null() {
+                Err(JsonError::ParseError)
+            } else {
+                Ok(json as *mut Json)
+            }
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
+/// Parse a specific length of a JSON string into a Json object.
+///
+/// Args:
+/// - `value: String`: The JSON string to be parsed. Providing an empty string will result in
+/// JsonError::EmptyStringError.
+/// - `buffer_length: usize`: Length of the JSON string to be parsed.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - if the parsing happens successfully.
+/// - `Err(JsonError::EmptyStringError)` - if the provided `value` string is empty (can't parse an
+/// empty string).
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let value = "{\"rps\":500} more text".to_string();
+///     match parse_json_with_length(value, 11) {
+///         Ok(json) => println!("{}", json.print().unwrap()),
+///         Err(err) => eprintln!("{}", err),
+///     }
+/// }
+/// ```
+///
+/// Output:
+/// ```json
+/// {
+///     "rps": 500
+/// }
+/// ```
+pub fn parse_json_with_length(value: String, buffer_length: usize) -> Result<*mut Json, JsonError> {
+    if value.is_empty() {
+        return Err(JsonError::EmptyStringError);
+    }
+
+    match CString::new(value) {
+        Ok(c_str) => {
+            let json = unsafe { cJSON_ParseWithLength(c_str.as_ptr(), buffer_length) };
             if json.is_null() {
                 Err(JsonError::ParseError)
             } else {
