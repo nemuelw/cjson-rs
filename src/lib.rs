@@ -1,6 +1,6 @@
 mod bindings;
 use bindings::*;
-use std::ffi::{CStr, CString, NulError};
+use std::ffi::{c_char, c_void, CStr, CString, NulError};
 
 pub const VERSION_MAJOR: u32 = bindings::CJSON_VERSION_MAJOR;
 pub const VERSION_MINOR: u32 = bindings::CJSON_VERSION_MINOR;
@@ -1067,4 +1067,46 @@ pub fn cjson_create_float_array(numbers: *const f32, count: i32) -> *mut Json {
 /// ```
 pub fn cjson_create_double_array(numbers: *const f64, count: i32) -> *mut Json {
     unsafe { cJSON_CreateDoubleArray(numbers, count) as *mut Json }
+}
+
+/// Create Json item of type `Array` containing string values.
+///
+/// Args:
+/// - `strings: &[&str]` - Reference to an array of string slices.
+/// - `count: i32` - Number of array elements to include in the `Array` being created (typically just the
+/// size of the `strings` array).
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `Array` containing string values.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let strings = ["Alice", "Bob", "Chloe"];
+///     let arr = cjson_create_string_array(&strings, strings.len() as i32).unwrap();
+///     assert_eq!(arr.is_type_array(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_string_array(strings: &[&str], count: i32) -> Result<*mut Json, JsonError> {
+    let mut c_strings: Vec<CString> = Vec::with_capacity(strings.len());
+
+    for &s in strings {
+        match CString::new(s) {
+            Ok(c_str) => c_strings.push(c_str),
+            Err(err) => return Err(JsonError::CStringError(err)),
+        }
+    }
+
+    let pointers: Vec<*const c_void> = c_strings
+        .iter()
+        .map(|s| s.as_ptr() as *const c_void)
+        .collect();
+
+    let array = unsafe {
+        cJSON_CreateStringArray(pointers.as_ptr() as *const *const c_char, count) as *mut Json
+    };
+    Ok(array)
 }
