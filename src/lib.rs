@@ -781,3 +781,22 @@ pub fn cjson_create_null() -> *mut Json {
 pub fn cjson_create_true() -> *mut Json {
     unsafe { cJSON_CreateTrue() as *mut Json }
 }
+
+/// Create Json item of type `False`.
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `False`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_false();
+///     assert_eq!(json.is_type_false(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_false() -> *mut Json {
+    unsafe { cJSON_CreateFalse() as *mut Json }
+}
