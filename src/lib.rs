@@ -197,6 +197,56 @@ impl std::fmt::Display for JsonError {
 impl std::error::Error for JsonError {}
 
 impl Json {
+    // check whether the Json object is of type Invalid
+    fn is_invalid(&self) -> bool {
+        unsafe { cJSON_IsInvalid(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type False
+    fn is_false(&self) -> bool {
+        unsafe { cJSON_IsFalse(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type True
+    fn is_true(&self) -> bool {
+        unsafe { cJSON_IsTrue(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type Bool
+    fn is_bool(&self) -> bool {
+        unsafe { cJSON_IsBool(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type Null
+    fn is_null(&self) -> bool {
+        unsafe { cJSON_IsNull(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type Number
+    fn is_number(&self) -> bool {
+        unsafe { cJSON_IsNumber(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type String
+    fn is_string(&self) -> bool {
+        unsafe { cJSON_IsString(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type Array
+    fn is_array(&self) -> bool {
+        unsafe { cJSON_IsArray(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type Object
+    fn is_object(&self) -> bool {
+        unsafe { cJSON_IsObject(self as *const Json as *const cJSON) == 1 }
+    }
+
+    // check whether the Json object is of type Raw
+    fn is_raw(&self) -> bool {
+        unsafe { cJSON_IsRaw(self as *const Json as *const cJSON) == 1 }
+    }
+
     // generate a string representation of the JSON object
     fn print(&self) -> Result<String, JsonError> {
         let c_str = unsafe { cJSON_Print(self as *const Json as *const cJSON) };
@@ -255,6 +305,16 @@ impl Json {
 }
 
 pub trait JsonPtrExt {
+    fn is_invalid(&self) -> bool;
+    fn is_false(&self) -> bool;
+    fn is_true(&self) -> bool;
+    fn is_bool(&self) -> bool;
+    fn is_null(&self) -> bool;
+    fn is_number(&self) -> bool;
+    fn is_string(&self) -> bool;
+    fn is_array(&self) -> bool;
+    fn is_object(&self) -> bool;
+    fn is_raw(&self) -> bool;
     fn print(&self) -> Result<String, JsonError>;
     fn print_buffered(&self, prebuffer: i32, fmt: bool) -> Result<String, JsonError>;
     fn print_preallocated(
@@ -268,6 +328,116 @@ pub trait JsonPtrExt {
 }
 
 impl JsonPtrExt for *mut Json {
+    /// Check whether the Json object is of type `Invalid`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `Invalid`
+    fn is_invalid(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_invalid(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `False`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `False`
+    fn is_false(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_false(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `True`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `True`
+    fn is_true(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_true(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `Bool`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `Bool`
+    fn is_bool(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_bool(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `Null`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `Null`
+    fn is_null(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_null(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `Number`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `Number`
+    fn is_number(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_number(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `String`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `String`
+    fn is_string(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_string(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `Array`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `Array`
+    fn is_array(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_array(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `Object`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `Object`
+    fn is_object(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_object(),
+            None => false,
+        }
+    }
+
+    /// Check whether the Json object is of type `Raw`
+    ///
+    /// Returns:
+    /// - `bool` - indicating whether or not the Json object is of type `Raw`
+    fn is_raw(&self) -> bool {
+        match unsafe { self.as_mut() } {
+            Some(json) => json.is_raw(),
+            None => false,
+        }
+    }
+
     /// Generate a string representation of the JSON object eg.
     /// ```json
     /// {
