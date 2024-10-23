@@ -327,10 +327,10 @@ pub trait JsonPtrExt {
 }
 
 impl JsonPtrExt for *mut Json {
-    /// Check whether the Json object is of type `Invalid`
+    /// Check whether the Json object is of type `Invalid`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `Invalid`
+    /// - `bool` - indicating whether or not the Json object is of type `Invalid`.
     fn is_invalid(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_invalid(),
@@ -338,10 +338,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `False`
+    /// Check whether the Json object is of type `False`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `False`
+    /// - `bool` - indicating whether or not the Json object is of type `False`.
     fn is_false(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_false(),
@@ -349,10 +349,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `True`
+    /// Check whether the Json object is of type `True`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `True`
+    /// - `bool` - indicating whether or not the Json object is of type `True`.
     fn is_true(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_true(),
@@ -360,10 +360,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `Bool`
+    /// Check whether the Json object is of type `Bool`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `Bool`
+    /// - `bool` - indicating whether or not the Json object is of type `Bool`.
     fn is_bool(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_bool(),
@@ -371,10 +371,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `Null`
+    /// Check whether the Json object is of type `Null`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `Null`
+    /// - `bool` - indicating whether or not the Json object is of type `Null`.
     fn is_null(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_null(),
@@ -382,10 +382,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `Number`
+    /// Check whether the Json object is of type `Number`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `Number`
+    /// - `bool` - indicating whether or not the Json object is of type `Number`.
     fn is_number(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_number(),
@@ -393,10 +393,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `String`
+    /// Check whether the Json object is of type `String`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `String`
+    /// - `bool` - indicating whether or not the Json object is of type `String`.
     fn is_string(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_string(),
@@ -404,10 +404,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `Array`
+    /// Check whether the Json object is of type `Array`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `Array`
+    /// - `bool` - indicating whether or not the Json object is of type `Array`.
     fn is_array(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_array(),
@@ -415,10 +415,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `Object`
+    /// Check whether the Json object is of type `Object`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `Object`
+    /// - `bool` - indicating whether or not the Json object is of type `Object`.
     fn is_object(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_object(),
@@ -426,10 +426,10 @@ impl JsonPtrExt for *mut Json {
         }
     }
 
-    /// Check whether the Json object is of type `Raw`
+    /// Check whether the Json object is of type `Raw`.
     ///
     /// Returns:
-    /// - `bool` - indicating whether or not the Json object is of type `Raw`
+    /// - `bool` - indicating whether or not the Json object is of type `Raw`.
     fn is_raw(&self) -> bool {
         match unsafe { self.as_mut() } {
             Some(json) => json.is_raw(),
