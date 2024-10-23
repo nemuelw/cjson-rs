@@ -844,3 +844,33 @@ pub fn cjson_create_bool(boolean: bool) -> *mut Json {
 pub fn cjson_create_number(num: f64) -> *mut Json {
     unsafe { cJSON_CreateNumber(num) as *mut Json }
 }
+
+/// Create Json item of type `String`.
+///
+/// Args:
+/// - `string: String`: String value for the Json item to create.
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `String`.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+/// 
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_string("Nemuel".to_string()).unwrap();
+///     assert_eq!(json.is_type_string(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_string(string: String) -> Result<*mut Json, JsonError> {
+    match CString::new(string) {
+        Ok(c_str) => {
+            let json = unsafe { cJSON_CreateString(c_str.as_ptr()) as *mut Json };
+            Ok(json)
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
