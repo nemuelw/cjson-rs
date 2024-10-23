@@ -845,7 +845,7 @@ pub fn cjson_create_number(num: f64) -> *mut Json {
     unsafe { cJSON_CreateNumber(num) as *mut Json }
 }
 
-/// Create Json item of type `String`.
+/// Create Json item of type `String` (copies the string).
 ///
 /// Args:
 /// - `string: String`: String value for the Json item to create.
@@ -853,7 +853,6 @@ pub fn cjson_create_number(num: f64) -> *mut Json {
 /// Returns:
 /// - `*mut Json` - a mutable pointer to the created Json item of type `String`.
 /// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
-///
 ///
 /// Example:
 /// ```rust
@@ -892,4 +891,37 @@ pub fn cjson_create_string(string: String) -> Result<*mut Json, JsonError> {
 /// ```
 pub fn cjson_create_array() -> *mut Json {
     unsafe { cJSON_CreateArray() as *mut Json }
+}
+
+/// Create Json item of type `String`.
+///
+/// It points directly to the string. This means the `valuestring` field of the Json struct will
+/// not be deleted by `cjson_delete`, and you are therefore responsible for its lifetime (useful
+/// for constants).
+///
+/// Args:
+/// - `string: String`: String value for the Json item to create.
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `String`.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_string_reference("Nemuel".to_string()).unwrap();
+///     assert_eq!(json.is_type_string(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_string_reference(string: String) -> Result<*mut Json, JsonError> {
+    match CString::new(string) {
+        Ok(c_str) => {
+            let json = unsafe { cJSON_CreateStringReference(c_str.as_ptr()) as *mut Json };
+            Ok(json)
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
 }
