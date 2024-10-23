@@ -800,3 +800,25 @@ pub fn cjson_create_true() -> *mut Json {
 pub fn cjson_create_false() -> *mut Json {
     unsafe { cJSON_CreateFalse() as *mut Json }
 }
+
+/// Create Json item of type `Bool`.
+///
+/// Args:
+/// - `boolean: bool`: Boolean value for the Json item to create (true or false).
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the created Json item of type `Bool`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_bool(true);
+///     assert_eq!(json.is_type_bool(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_create_bool(boolean: bool) -> *mut Json {
+    unsafe { cJSON_CreateBool(if boolean { 1 } else { 0 }) as *mut Json }
+}
