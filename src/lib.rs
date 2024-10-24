@@ -1229,3 +1229,39 @@ pub fn cjson_get_error_ptr() -> Option<String> {
         None
     }
 }
+
+/// Get the string value of a Json item of type `String`.
+///
+/// Args:
+/// - `item: *mut Json` - Mutable pointer to the Json item of type `String` whose string value we
+/// want to get.
+///
+/// Returns:
+/// - `Ok(String)` - if the string value is successfully gotten.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item provided is not of type `String`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_string("Nemuel".to_string()).unwrap();
+///     assert_eq!(cjson_get_string_value(json).unwrap(), "Nemuel".to_string());
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_get_string_value(item: *mut Json) -> Result<String, JsonError> {
+    if !item.is_type_string() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot get string value from a non-string Json item".to_string(),
+        ));
+    }
+
+    let c_str = unsafe { cJSON_GetStringValue(item as *mut cJSON) };
+    Ok(unsafe {
+        CStr::from_ptr(c_str)
+            .to_str()
+            .unwrap_or_default()
+            .to_string()
+    })
+}
