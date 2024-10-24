@@ -1110,3 +1110,33 @@ pub fn cjson_create_string_array(strings: &[&str], count: i32) -> Result<*mut Js
     };
     Ok(array)
 }
+
+/// Get the size of Json item of type `Array`.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` whose size we want.
+///
+/// Returns:
+/// - `Ok(i32)` - if the size of the Json item of type `Array` is successfully determined.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let strings = ["Alice", "Bob", "Chloe", "Dan", "Eyal"];
+///     let arr = cjson_create_string_array(&strings, strings.len() as i32).unwrap();
+///     assert_eq!(cjson_get_array_size(arr).unwrap(), 5);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_get_array_size(array: *mut Json) -> Result<i32, JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot get array size for a non-array Json item".to_string(),
+        ))
+    } else {
+        Ok(unsafe { cJSON_GetArraySize(array as *const cJSON) })
+    }
+}
