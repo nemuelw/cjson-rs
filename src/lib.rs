@@ -707,7 +707,7 @@ pub fn cjson_parse_json_with_length(
 /// Create Json item of type `Raw`.
 ///
 /// Args:
-/// - `raw: String` - raw string, JSON or otherwise.
+/// - `raw: String` - Raw string (JSON or otherwise).
 ///
 /// Returns:
 /// - `Ok(*mut Json)` - a mutable pointer to the created Json item of type `Raw`.
@@ -1554,6 +1554,58 @@ pub fn cjson_add_string_to_object(
                         object as *mut cJSON,
                         name_c_str.as_ptr(),
                         string_c_str.as_ptr(),
+                    ) as *mut Json
+                };
+                Ok(result)
+            }
+            Err(err) => Err(JsonError::CStringError(err)),
+        },
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
+/// Add Json item of type `Raw` to Json item of type `Object`.
+///
+/// Args:
+/// - `object: *mut Json` - Json item of type `Object` to add the Json item of type `Raw` to.
+/// - `name: &str` - Key to set for the item being added.
+/// - `raw: &str` - Raw string (JSON or otherwise).
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the Json item of type `Raw` that has been added.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item provided is not of type `Object`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+/// 
+/// fn main() {
+///     let object: *mut Json = cjson_create_object();
+///     cjson_add_raw_to_object(object, "name", "Nemuel").unwrap();
+///     let test_raw_item = cjson_get_object_item(object, "name").unwrap();
+///     assert_eq!(test_raw_item.is_type_raw(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_add_raw_to_object(
+    object: *mut Json,
+    name: &str,
+    raw: &str,
+) -> Result<*mut Json, JsonError> {
+    if !object.is_type_object() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot add item to a non-object Json item".to_string(),
+        ));
+    }
+
+    match CString::new(name) {
+        Ok(name_c_str) => match CString::new(raw) {
+            Ok(raw_c_str) => {
+                let result = unsafe {
+                    cJSON_AddRawToObject(
+                        object as *mut cJSON,
+                        name_c_str.as_ptr(),
+                        raw_c_str.as_ptr(),
                     ) as *mut Json
                 };
                 Ok(result)
