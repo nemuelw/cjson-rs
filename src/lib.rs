@@ -1354,7 +1354,7 @@ pub fn cjson_replace_item_in_array(
     }
 }
 
-/// Detach item from Json item of type `Array` at a specific index.
+/// Detach item at a specific index from Json item of type `Array`.
 ///
 /// Args:
 /// - `array: *mut Json` - The Json item of type `Array` from which an item is to be detached.
@@ -1387,6 +1387,42 @@ pub fn cjson_detach_item_from_array(array: *mut Json, which: i32) -> Result<*mut
         ))
     } else {
         Ok(unsafe { cJSON_DetachItemFromArray(array as *mut cJSON, which) as *mut Json })
+    }
+}
+
+/// Delete item at a specific index from Json item of type `Array`.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` from which an item is to be deleted.
+/// - `which: i32` - The index of the item to be deleted from the array.
+///
+/// Returns:
+/// - `Ok()` - if the operation is successful.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let names = ["Alice", "Bob", "Chloe"];
+///     let array = cjson_create_string_array(&names, 3).unwrap();
+///     assert_eq!(cjson_get_array_size(array).unwrap(), 3);
+///
+///     cjson_delete_item_from_array(array, 2).unwrap();
+///
+///     assert_eq!(cjson_get_array_size(array).unwrap(), 2);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_delete_item_from_array(array: *mut Json, which: i32) -> Result<(), JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot delete item from a non-array Json item".to_string(),
+        ))
+    } else {
+        unsafe { cJSON_DeleteItemFromArray(array as *mut cJSON, which) };
+        Ok(())
     }
 }
 
