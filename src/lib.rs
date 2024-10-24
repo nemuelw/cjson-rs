@@ -1250,7 +1250,7 @@ pub fn cjson_add_item_reference_to_array(
     }
 }
 
-/// Add an item to Json item of type `Array` at a specific index.
+/// Insert an item at a specific index in a Json item of type `Array`.
 ///
 /// Args:
 /// - `array: *mut Json` - The Json item of type `Array` where the item will be added.
