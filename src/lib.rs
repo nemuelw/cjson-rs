@@ -1206,6 +1206,50 @@ pub fn cjson_add_item_to_array(array: *mut Json, item: *mut Json) -> Result<bool
     }
 }
 
+/// Add an item to Json item of type `Array` while maintaining a reference to the original item rather
+/// than copying it.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` where the item will be added.
+/// - `item: *mut Json` - The item to add to the Json item of type `Array`.
+///
+/// Returns:
+/// - `Ok(bool)` - boolean value indicating success or failure of the operation.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let numbers = [1, 2, 3, 4];
+///     let arr = cjson_create_int_array(&numbers[0], 4);
+///     let item = cjson_create_number(5.0);
+///     let success = cjson_add_item_reference_to_array(arr, item).unwrap();
+///     assert_eq!(success, true);
+///     assert_eq!(cjson_get_array_size(arr).unwrap(), 5);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_add_item_reference_to_array(
+    array: *mut Json,
+    item: *mut Json,
+) -> Result<bool, JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot add item to a non-array Json item".to_string(),
+        ))
+    } else {
+        let result =
+            unsafe { cJSON_AddItemReferenceToArray(array as *mut cJSON, item as *mut cJSON) };
+        if result == 1 {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+}
+
 /// Get error message associated with the last parsing operation that failed.
 ///
 /// Returns:
