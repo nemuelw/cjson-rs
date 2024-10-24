@@ -1141,7 +1141,7 @@ pub fn cjson_get_array_size(array: *mut Json) -> Result<i32, JsonError> {
     }
 }
 
-/// Get the item at the provided index of the Json item of type `Array`.
+/// Get the item at the provided index of a Json item of type `Array`.
 ///
 /// Args:
 /// - `array: *mut Json` - The Json item of type `Array` from which we want to get an item.
@@ -1154,7 +1154,7 @@ pub fn cjson_get_array_size(array: *mut Json) -> Result<i32, JsonError> {
 /// Example:
 /// ```rust
 /// use cjson_rs::*;
-/// 
+///
 /// fn main() {
 ///     let strings = ["Alice", "Bob", "Chloe", "Dan", "Eyal"];
 ///     let arr = cjson_create_string_array(&strings, strings.len() as i32).unwrap();
@@ -1173,5 +1173,44 @@ pub fn cjson_get_array_item(array: *mut Json, index: i32) -> Result<*mut Json, J
         ))
     } else {
         Ok(unsafe { cJSON_GetArrayItem(array as *const cJSON, index) as *mut Json })
+    }
+}
+
+/// Add an item to Json item of type `Array`.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` where the item will be added.
+/// - `item: *mut Json` - The item to add to the Json item of type `Array`.
+///
+/// Returns:
+/// - `Ok(bool)` - indicating success or failure in adding the item to the Json item of type `Array`.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let numbers = [1, 2, 3, 4];
+///     let arr = cjson_create_int_array(&numbers[0], 4);
+///     let item = cjson_create_number(5.0);
+///     let success = cjson_add_item_to_array(arr, item).unwrap();
+///     assert_eq!(success, true);
+///     assert_eq!(cjson_get_array_size(arr).unwrap(), 5);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_add_item_to_array(array: *mut Json, item: *mut Json) -> Result<bool, JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot add item to a non-array Json item".to_string(),
+        ))
+    } else {
+        let result = unsafe { cJSON_AddItemToArray(array as *mut cJSON, item as *mut cJSON) };
+        if result == 1 {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 }
