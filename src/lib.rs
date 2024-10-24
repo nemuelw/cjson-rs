@@ -14,13 +14,17 @@ pub const CJSON_VERSION_PATCH: u32 = bindings::CJSON_VERSION_PATCH;
 ///
 /// fn main() {
 ///     assert_eq!(cjson_version(), "1.7.18");
+///     println!("Test passed"); // Test passed
 /// }
 /// ```
 pub fn cjson_version() -> String {
-    format!(
-        "{}.{}.{}",
-        CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH
-    )
+    let cjson_version = unsafe { cJSON_Version() };
+    unsafe {
+        CStr::from_ptr(cjson_version)
+            .to_str()
+            .unwrap_or_default()
+            .to_string()
+    }
 }
 
 /// Struct for managing custom memory allocation and deallocation functions.
