@@ -1735,7 +1735,7 @@ pub fn cjson_add_array_to_object(object: *mut Json, name: &str) -> Result<*mut J
 ///
 /// Args:
 /// - `object: *mut Json` - Json item of type `Object` to add the Json item to.
-/// - `name: &str` - Key to set for the item being added.
+/// - `string: &str` - Key to set for the item being added.
 /// - `item: *mut Json` - Json item to be added.
 ///
 /// Returns:
@@ -1758,7 +1758,7 @@ pub fn cjson_add_array_to_object(object: *mut Json, name: &str) -> Result<*mut J
 /// ```
 pub fn cjson_add_item_to_object(
     object: *mut Json,
-    name: &str,
+    string: &str,
     item: *mut Json,
 ) -> Result<bool, JsonError> {
     if !object.is_type_object() {
@@ -1767,7 +1767,7 @@ pub fn cjson_add_item_to_object(
         ));
     }
 
-    match CString::new(name) {
+    match CString::new(string) {
         Ok(c_str) => {
             let success = unsafe {
                 cJSON_AddItemToObject(object as *mut cJSON, c_str.as_ptr(), item as *mut cJSON)
