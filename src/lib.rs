@@ -1387,7 +1387,7 @@ pub fn cjson_add_true_to_object(object: *mut Json, name: &str) -> Result<*mut Js
 /// Example:
 /// ```rust
 /// use cjson_rs::*;
-/// 
+///
 /// fn main() {
 ///     let object = cjson_create_object();
 ///     cjson_add_false_to_object(object, "test").unwrap();
@@ -1407,6 +1407,56 @@ pub fn cjson_add_false_to_object(object: *mut Json, name: &str) -> Result<*mut J
         Ok(c_str) => {
             let result = unsafe {
                 cJSON_AddFalseToObject(object as *mut cJSON, c_str.as_ptr()) as *mut Json
+            };
+            Ok(result)
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
+/// Add Json item of type `Bool` to Json item of type `Object`.
+///
+/// Args:
+/// - `object: *mut Json` - Json item of type `Object` to add the Json item of type `Bool` to.
+/// - `name: &str` - Key to set for the item being added.
+/// - `boolean: bool` - Boolean value for the Json item being added (true or false).
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the Json item of type `Bool` that has been added.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item provided is not of type `Object`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let object = cjson_create_object();
+///     cjson_add_bool_to_object(object, "test", true).unwrap();
+///     let test_bool_item = cjson_get_object_item(object, "test").unwrap();
+///     assert_eq!(test_bool_item.is_type_bool(), true);
+///     assert_eq!(test_bool_item.is_type_true(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_add_bool_to_object(
+    object: *mut Json,
+    name: &str,
+    boolean: bool,
+) -> Result<*mut Json, JsonError> {
+    if !object.is_type_object() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot add item to a non-object Json item".to_string(),
+        ));
+    }
+
+    match CString::new(name) {
+        Ok(c_str) => {
+            let result = unsafe {
+                cJSON_AddBoolToObject(
+                    object as *mut cJSON,
+                    c_str.as_ptr(),
+                    if boolean { 1 } else { 0 },
+                ) as *mut Json
             };
             Ok(result)
         }
