@@ -1140,3 +1140,38 @@ pub fn cjson_get_array_size(array: *mut Json) -> Result<i32, JsonError> {
         Ok(unsafe { cJSON_GetArraySize(array as *const cJSON) })
     }
 }
+
+/// Get the item at the provided index of the Json item of type `Array`.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` from which we want to get an item.
+/// - `index: i32` - Index of the item we want to get from the Json item of type `Array`.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - mutable pointer to the item at the specified index.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+/// 
+/// fn main() {
+///     let strings = ["Alice", "Bob", "Chloe", "Dan", "Eyal"];
+///     let arr = cjson_create_string_array(&strings, strings.len() as i32).unwrap();
+///     match cjson_get_array_item(arr, 2) {
+///         Ok(item) => {
+///             println!("{}", item.print().unwrap()); // output: "Chloe"
+///         }
+///         Err(err) => eprintln!("{}", err),
+///     }
+/// }
+/// ```
+pub fn cjson_get_array_item(array: *mut Json, index: i32) -> Result<*mut Json, JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot get array item from a non-array Json item".to_string(),
+        ))
+    } else {
+        Ok(unsafe { cJSON_GetArrayItem(array as *const cJSON, index) as *mut Json })
+    }
+}
