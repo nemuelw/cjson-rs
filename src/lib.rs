@@ -1354,6 +1354,42 @@ pub fn cjson_replace_item_in_array(
     }
 }
 
+/// Detach item from Json item of type `Array` at a specific index.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` from which an item is to be detached.
+/// - `which: i32` - The index of the item to be detached from the array.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the detached item if the operation is successful.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let names = ["Alice", "Bob", "Chloe"];
+///     let array = cjson_create_string_array(&names, 3).unwrap();
+///     assert_eq!(cjson_get_array_size(array).unwrap(), 3);
+///
+///     let detached_item = cjson_detach_item_from_array(array, 2).unwrap();
+///
+///     assert_eq!(cjson_get_string_value(detached_item).unwrap(), "Chloe");
+///     assert_eq!(cjson_get_array_size(array).unwrap(), 2);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_detach_item_from_array(array: *mut Json, which: i32) -> Result<*mut Json, JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot replace item in a non-array Json item".to_string(),
+        ))
+    } else {
+        Ok(unsafe { cJSON_DetachItemFromArray(array as *mut cJSON, which) as *mut Json })
+    }
+}
+
 /// Get error message associated with the last parsing operation that failed.
 ///
 /// Returns:
