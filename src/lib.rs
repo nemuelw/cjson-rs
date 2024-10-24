@@ -2066,6 +2066,46 @@ pub fn cjson_add_item_to_object_cs(
     }
 }
 
+/// Check whether or not the Json item of type `Object` contains an item with the specified key.
+///
+/// Args:
+/// - `object: *mut Json` - The Json item of type `Object` to inspect for an item with the specified key.
+/// - `string: &str` - String slice specifying the key of the item being looked for.
+///
+/// Returns:
+/// - `Ok(bool)` - a boolean value indicating whether or not an item with the specified key exists within
+/// the object if the lookup is successful.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string slice (representing the key)
+/// contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let object = cjson_create_object();
+///     cjson_add_string_to_object(object, "name", "Nemuel").unwrap();
+///
+///     assert_eq!(cjson_has_object_item(object, "name").unwrap(), true);
+///     assert_eq!(cjson_has_object_item(object, "age").unwrap(), false);
+///
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_has_object_item(object: *mut Json, string: &str) -> Result<bool, JsonError> {
+    match CString::new(string) {
+        Ok(c_str) => {
+            let result = unsafe { cJSON_HasObjectItem(object as *const cJSON, c_str.as_ptr()) };
+            if result == 1 {
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
 /// Get item within the object with the specified key.
 ///
 /// Args:
