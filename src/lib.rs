@@ -1383,7 +1383,7 @@ pub fn cjson_replace_item_in_array(
 pub fn cjson_detach_item_from_array(array: *mut Json, which: i32) -> Result<*mut Json, JsonError> {
     if !array.is_type_array() {
         Err(JsonError::InvalidTypeError(
-            "cannot replace item in a non-array Json item".to_string(),
+            "cannot detach item from a non-array Json item".to_string(),
         ))
     } else {
         Ok(unsafe { cJSON_DetachItemFromArray(array as *mut cJSON, which) as *mut Json })
