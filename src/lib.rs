@@ -1296,6 +1296,64 @@ pub fn cjson_insert_item_in_array(
     }
 }
 
+/// Replace item at a specific index in Json item of type `Array`.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` in which the replacement will happen.
+/// - `which: i32` - Index specifying the item to be replaced.
+/// - `newitem: *mut Json` - The item replacing the one at the specified index.
+///
+/// Returns:
+/// - `Ok(bool)` - indicating success or faanilure of the operation.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let names = ["Alice", "Bob", "Chloe", "Dan"];
+///     let array = cjson_create_string_array(&names, 4).unwrap();
+///
+///     let original_item = cjson_get_array_item(array, 3).unwrap();
+///     assert_eq!(
+///         cjson_get_string_value(original_item).unwrap(),
+///         "Dan"
+///     );
+///
+///     let newitem = cjson_create_string("Diana".to_string()).unwrap();
+///     let success = cjson_replace_item_in_array(array, 3, newitem).unwrap();
+///     assert_eq!(success, true);
+///
+///     let new_item = cjson_get_array_item(array, 3).unwrap();
+///     assert_eq!(
+///         cjson_get_string_value(new_item).unwrap(),
+///         "Diana"
+///     );
+///
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_replace_item_in_array(
+    array: *mut Json,
+    which: i32,
+    newitem: *mut Json,
+) -> Result<bool, JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot replace item in a non-array Json item".to_string(),
+        ))
+    } else {
+        let result =
+            unsafe { cJSON_ReplaceItemInArray(array as *mut cJSON, which, newitem as *mut cJSON) };
+        if result == 1 {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+}
+
 /// Get error message associated with the last parsing operation that failed.
 ///
 /// Returns:
