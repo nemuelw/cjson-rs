@@ -695,6 +695,21 @@ pub fn cjson_parse_json_with_length(
     }
 }
 
+/// Get error message associated with the last parsing operation that failed.
+///
+/// Returns:
+/// - `Some(String)` - if an error message exists.
+/// - `None` - if there is no error message.
+pub fn cjson_get_error_ptr() -> Option<String> {
+    let c_str = unsafe { cJSON_GetErrorPtr() };
+    if !c_str.is_null() {
+        let c_str_ref = unsafe { CStr::from_ptr(c_str) };
+        Some(c_str_ref.to_str().unwrap_or_default().to_string())
+    } else {
+        None
+    }
+}
+
 /// Create Json item of type `Raw`.
 ///
 /// Args:
@@ -1423,21 +1438,6 @@ pub fn cjson_delete_item_from_array(array: *mut Json, which: i32) -> Result<(), 
     } else {
         unsafe { cJSON_DeleteItemFromArray(array as *mut cJSON, which) };
         Ok(())
-    }
-}
-
-/// Get error message associated with the last parsing operation that failed.
-///
-/// Returns:
-/// - `Some(String)` - if an error message exists.
-/// - `None` - if there is no error message.
-pub fn cjson_get_error_ptr() -> Option<String> {
-    let c_str = unsafe { cJSON_GetErrorPtr() };
-    if !c_str.is_null() {
-        let c_str_ref = unsafe { CStr::from_ptr(c_str) };
-        Some(c_str_ref.to_str().unwrap_or_default().to_string())
-    } else {
-        None
     }
 }
 
