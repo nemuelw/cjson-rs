@@ -1782,6 +1782,62 @@ pub fn cjson_add_item_to_object(
     }
 }
 
+/// Add an item to Json item of type `Object` while maintaining a reference to the original item rather
+/// than copying it.
+///
+/// Args:
+/// - `object: *mut Json` - Json item of type `Object` to add the Json item to.
+/// - `string: &str` - Key to set for the item being added.
+/// - `item: *mut Json` - Json item to be added.
+///
+/// Returns:
+/// - `Ok(bool)` - a boolean value indicating whether or not the operation was successful.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item to be added to is not of type `Object`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let test_item = cjson_create_null();
+///     let object = cjson_create_object();
+///     assert_eq!(
+///         cjson_add_item_reference_to_object(object, "test", test_item).unwrap(),
+///         true
+///     );
+///     println!("Test passed"); // Test passed
+/// }
+/// ```
+pub fn cjson_add_item_reference_to_object(
+    object: *mut Json,
+    string: &str,
+    item: *mut Json,
+) -> Result<bool, JsonError> {
+    if !object.is_type_object() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot add item to a non-object Json item".to_string(),
+        ));
+    }
+
+    match CString::new(string) {
+        Ok(c_str) => {
+            let success = unsafe {
+                cJSON_AddItemReferenceToObject(
+                    object as *mut cJSON,
+                    c_str.as_ptr(),
+                    item as *mut cJSON,
+                )
+            };
+            if success == 1 {
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
 /// Add Json item of any type to Json item of type `Object` with a name/key that is a constant
 /// or reference.
 ///
