@@ -2,25 +2,9 @@ mod bindings;
 use bindings::*;
 use std::ffi::{c_char, c_void, CStr, CString, NulError};
 
-pub const VERSION_MAJOR: u32 = bindings::CJSON_VERSION_MAJOR;
-pub const VERSION_MINOR: u32 = bindings::CJSON_VERSION_MINOR;
-pub const VERSION_PATCH: u32 = bindings::CJSON_VERSION_PATCH;
-pub const IS_REFERENCE: u32 = 256;
-pub const STRING_IS_CONST: u32 = 512;
-pub const NESTING_LIMIT: u32 = 1000;
-pub const CIRCULAR_LIMIT: u32 = 10000;
-
-pub enum JsonValueType {
-    Invalid = 0,
-    False = 1,
-    True = 2,
-    Null = 4,
-    Number = 8,
-    String = 16,
-    Array = 32,
-    Object = 64,
-    Raw = 128,
-}
+pub const CJSON_VERSION_MAJOR: u32 = bindings::CJSON_VERSION_MAJOR;
+pub const CJSON_VERSION_MINOR: u32 = bindings::CJSON_VERSION_MINOR;
+pub const CJSON_VERSION_PATCH: u32 = bindings::CJSON_VERSION_PATCH;
 
 /// Get the version of the underlying cJSON library.
 ///
@@ -33,7 +17,10 @@ pub enum JsonValueType {
 /// }
 /// ```
 pub fn cjson_version() -> String {
-    format!("{}.{}.{}", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+    format!(
+        "{}.{}.{}",
+        CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH
+    )
 }
 
 /// Struct for managing custom memory allocation and deallocation functions.
