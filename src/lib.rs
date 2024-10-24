@@ -1265,3 +1265,33 @@ pub fn cjson_get_string_value(item: *mut Json) -> Result<String, JsonError> {
             .to_string()
     })
 }
+
+/// Get the number value of a Json item of type `Number`.
+///
+/// Args:
+/// - `item: *mut Json` - Mutable pointer to the Json item of type `Number` whose number value we
+/// want to get.
+///
+/// Returns:
+/// - `Ok(i32)` - if the number value is successfully gotten.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item provided is not of type `Number`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let json = cjson_create_number(254.0);
+///     assert_eq!(cjson_get_number_value(json).unwrap(), 254.0);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_get_number_value(item: *mut Json) -> Result<f64, JsonError> {
+    if !item.is_type_number() {
+        Err(JsonError::InvalidTypeError(
+            "cannot get number value from a non-number Json item".to_string(),
+        ))
+    } else {
+        Ok(unsafe { cJSON_GetNumberValue(item as *const cJSON) })
+    }
+}
