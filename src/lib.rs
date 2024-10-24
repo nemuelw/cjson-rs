@@ -2115,6 +2115,22 @@ pub fn cjson_has_object_item(object: *mut Json, string: &str) -> Result<bool, Js
 /// Returns:
 /// - `Ok(*mut Json)` - a mutable pointer to the Json item with the provided key if gotten successfully.
 /// - `Err(JsonError::CStringError(NulError))` - if the provided string slice contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let object = cjson_create_object();
+///     cjson_add_string_to_object(object, "name", "Nemuel").unwrap();
+///
+///     let item = cjson_get_object_item(object, "name").unwrap();
+///     assert_eq!(item.is_type_string(), true);
+///     assert_eq!(cjson_get_string_value(item).unwrap(), "Nemuel");
+///
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
 pub fn cjson_get_object_item(object: *mut Json, string: &str) -> Result<*mut Json, JsonError> {
     match CString::new(string) {
         Ok(c_str) => {
