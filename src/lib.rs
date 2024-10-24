@@ -1509,6 +1509,61 @@ pub fn cjson_add_number_to_object(
     }
 }
 
+/// Add Json item of type `String` to Json item of type `Object`.
+///
+/// Args:
+/// - `object: *mut Json` - Json item of type `Object` to add the Json item of type `String` to.
+/// - `name: &str` - Key to set for the item being added.
+/// - `string: &str` - String value for the Json item being added.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the Json item of type `String` that has been added.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item provided is not of type `Object`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let object = cjson_create_object();
+///     cjson_add_string_to_object(object, "name", "Nemuel").unwrap();
+///     let test_string_item = cjson_get_object_item(object, "name").unwrap();
+///     assert_eq!(test_string_item.is_type_string(), true);
+///     assert_eq!(
+///         cjson_get_string_value(test_string_item).unwrap(), "Nemuel"
+///     );
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_add_string_to_object(
+    object: *mut Json,
+    name: &str,
+    string: &str,
+) -> Result<*mut Json, JsonError> {
+    if !object.is_type_object() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot add item to a non-object Json item".to_string(),
+        ));
+    }
+
+    match CString::new(name) {
+        Ok(name_c_str) => match CString::new(string) {
+            Ok(string_c_str) => {
+                let result = unsafe {
+                    cJSON_AddStringToObject(
+                        object as *mut cJSON,
+                        name_c_str.as_ptr(),
+                        string_c_str.as_ptr(),
+                    ) as *mut Json
+                };
+                Ok(result)
+            }
+            Err(err) => Err(JsonError::CStringError(err)),
+        },
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
 /// Get item within the object with the specified key.
 ///
 /// Args:
