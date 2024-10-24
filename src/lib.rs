@@ -1250,6 +1250,52 @@ pub fn cjson_add_item_reference_to_array(
     }
 }
 
+/// Add an item to Json item of type `Array` at a specific index.
+///
+/// Args:
+/// - `array: *mut Json` - The Json item of type `Array` where the item will be added.
+/// - `which: i32` - Index specifying where to insert the new item in the array.
+/// - `newitem: *mut Json` - The item to add to the Json item of type `Array`.
+///
+/// Returns:
+/// - `Ok(bool)` - indicating success or failure of the operation.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the `array` value provided is not of type `Array`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let numbers = [1, 3, 4, 5];
+///     let arr = cjson_create_int_array(&numbers[0], 4);
+///     let item = cjson_create_number(2.0);
+///     let success = cjson_insert_item_in_array(arr, 1, item).unwrap();
+///     assert_eq!(success, true);
+///     let new_item = cjson_get_array_item(arr, 1).unwrap();
+///     assert_eq!(cjson_get_number_value(new_item).unwrap(), 2.0);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_insert_item_in_array(
+    array: *mut Json,
+    which: i32,
+    newitem: *mut Json,
+) -> Result<bool, JsonError> {
+    if !array.is_type_array() {
+        Err(JsonError::InvalidTypeError(
+            "cannot insert item in a non-array Json item".to_string(),
+        ))
+    } else {
+        let result =
+            unsafe { cJSON_InsertItemInArray(array as *mut cJSON, which, newitem as *mut cJSON) };
+        if result == 1 {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+}
+
 /// Get error message associated with the last parsing operation that failed.
 ///
 /// Returns:
