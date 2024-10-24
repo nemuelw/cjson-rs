@@ -1578,7 +1578,7 @@ pub fn cjson_add_string_to_object(
 /// Example:
 /// ```rust
 /// use cjson_rs::*;
-/// 
+///
 /// fn main() {
 ///     let object: *mut Json = cjson_create_object();
 ///     cjson_add_raw_to_object(object, "name", "Nemuel").unwrap();
@@ -1612,6 +1612,46 @@ pub fn cjson_add_raw_to_object(
             }
             Err(err) => Err(JsonError::CStringError(err)),
         },
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
+/// Add Json item of type `Object` to Json item of type `Object`.
+///
+/// Args:
+/// - `object: *mut Json` - Json item of type `Object` to add the Json item of type `Object` to.
+/// - `name: &str` - Key to set for the item being added.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the Json item of type `Object` that has been added.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item provided is not of type `Object`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let object: *mut Json = cjson_create_object();
+///     cjson_add_object_to_object(object, "test").unwrap();
+///     let test_object_item = cjson_get_object_item(object, "test").unwrap();
+///     assert_eq!(test_object_item.is_type_object(), true);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_add_object_to_object(object: *mut Json, name: &str) -> Result<*mut Json, JsonError> {
+    if !object.is_type_object() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot add item to a non-object Json item".to_string(),
+        ));
+    }
+
+    match CString::new(name) {
+        Ok(c_str) => {
+            let result = unsafe {
+                cJSON_AddObjectToObject(object as *mut cJSON, c_str.as_ptr()) as *mut Json
+            };
+            Ok(result)
+        }
         Err(err) => Err(JsonError::CStringError(err)),
     }
 }
