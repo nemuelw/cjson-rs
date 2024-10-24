@@ -1214,3 +1214,18 @@ pub fn cjson_add_item_to_array(array: *mut Json, item: *mut Json) -> Result<bool
         }
     }
 }
+
+/// Get error message associated with the last parsing operation that failed.
+///
+/// Returns:
+/// - `Some(String)` - if an error message exists.
+/// - `None` - if there is no error message.
+pub fn cjson_get_error_ptr() -> Option<String> {
+    let c_str = unsafe { cJSON_GetErrorPtr() };
+    if !c_str.is_null() {
+        let c_str_ref = unsafe { CStr::from_ptr(c_str) };
+        Some(c_str_ref.to_str().unwrap_or_default().to_string())
+    } else {
+        None
+    }
+}
