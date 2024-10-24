@@ -1295,3 +1295,23 @@ pub fn cjson_get_number_value(item: *mut Json) -> Result<f64, JsonError> {
         Ok(unsafe { cJSON_GetNumberValue(item as *const cJSON) })
     }
 }
+
+/// Get item within the object with the specified key.
+///
+/// Args:
+/// - `object: *mut Json` - Json item of type `Object` from which we want to get an item.
+/// - `string: &str` - Key of the Json item that we want to get.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the Json item with the provided key if gotten successfully.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string slice contains a null byte.
+pub fn cjson_get_object_item(object: *mut Json, string: &str) -> Result<*mut Json, JsonError> {
+    match CString::new(string) {
+        Ok(c_str) => {
+            let result =
+                unsafe { cJSON_GetObjectItem(object as *const cJSON, c_str.as_ptr()) as *mut Json };
+            Ok(result)
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
