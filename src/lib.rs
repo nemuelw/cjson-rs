@@ -137,7 +137,7 @@ impl Hooks {
 /// - `child`: An array or object item will have a child pointing to a chain of items in the array or object.
 /// - `type`: The type of the JSON value eg. `JsonValueType.Number`, `JsonValueType.Array`.
 /// - `valuestring`: Pointer to the string value if the type is a string (and raw).
-/// - `valueint`: Writing to this is deprecated. Use the `set_number_value` method instead.
+/// - `valueint`: Writing to this is deprecated. Use the `cjson_set_number_helper` method instead.
 /// - `valuedouble`: Double precision floating point value if the type is `JsonValueType.Number`.
 /// - `string`: Pointer to the key string (used when this `cJSON` object is part of an object).
 #[repr(C)]
@@ -884,6 +884,41 @@ pub fn cjson_create_bool(boolean: bool) -> *mut Json {
 /// ```
 pub fn cjson_create_number(num: f64) -> *mut Json {
     unsafe { cJSON_CreateNumber(num) as *mut Json }
+}
+
+/// Set the number value for a Json item of type `Number` to the specified value.
+///
+/// Args:
+/// - `item: *mut Json` - Mutable pointer to Json item of type `Number` whose number value is to be set.
+/// - `number: f64` - The number value to set for the Json item of type `Number`.
+///
+/// Returns:
+/// - `Ok(f64)` - if the operation happens successfully.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the provided Json item is not of type `Number`.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let number_item = cjson_create_number(1.0);
+///     assert_eq!(cjson_get_number_value(number_item).unwrap(), 1.0);
+///
+///     let new_number_value = cjson_set_number_helper(number_item, 2.0).unwrap();
+///     assert_eq!(new_number_value, 2.0);
+///
+///     assert_eq!(cjson_get_number_value(number_item).unwrap(), 2.0);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_set_number_helper(object: *mut Json, number: f64) -> Result<f64, JsonError> {
+    if !object.is_type_number() {
+        Err(JsonError::InvalidTypeError(
+            "cannot set number value for a non-number Json item".to_string(),
+        ))
+    } else {
+        Ok(unsafe { cJSON_SetNumberHelper(object as *mut cJSON, number) })
+    }
 }
 
 /// Create Json item of type `String` (copies the string).
