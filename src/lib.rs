@@ -2425,6 +2425,37 @@ pub fn cjson_replace_item_in_object_case_sensitive(
     }
 }
 
+/// Detach Json item from its parent via pointer (thus maintaining access to the detached item).
+///
+/// Args:
+/// - `parent: *mut Json` - Mutable pointer to the parent Json item from which an item is to be detached.
+/// - `item: *mut Json` - Mutable pointer to the Json item that is to be detached from its parent.
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the detached item.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let parent = cjson_create_object();
+///     let item = cjson_create_string("Nemuel".to_string()).unwrap();
+///
+///     cjson_add_item_to_object(parent, "name", item).unwrap();
+///     assert_eq!(cjson_has_object_item(parent, "name").unwrap(), true);
+///
+///     let detached_item = cjson_detach_item_via_pointer(parent, item);
+///     assert_eq!(detached_item.is_type_string(), true);
+///     assert_eq!(cjson_has_object_item(parent, "name").unwrap(), false);
+///
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_detach_item_via_pointer(parent: *mut Json, item: *mut Json) -> *mut Json {
+    unsafe { cJSON_DetachItemViaPointer(parent as *mut cJSON, item as *mut cJSON) as *mut Json }
+}
+
 /// Create a copy of a Json item.
 ///
 /// Args:
