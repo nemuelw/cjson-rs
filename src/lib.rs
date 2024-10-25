@@ -2508,6 +2508,52 @@ pub fn cjson_detach_item_via_pointer(parent: *mut Json, item: *mut Json) -> *mut
     unsafe { cJSON_DetachItemViaPointer(parent as *mut cJSON, item as *mut cJSON) as *mut Json }
 }
 
+/// Replace a Json item from its parent via pointer with a new item.
+///
+/// Args:
+/// - `parent: *mut Json` - Mutable pointer to the parent Json item in which an item is to be replaced.
+/// - `item: *mut Json` - Mutable pointer to the Json item that is to be replaced with another one.
+/// - `replacement: *mut Json` - Mutable pointer to the Json item that is to replace the original one.
+///
+/// Returns:
+/// - `bool` - a boolean value indicating success or failure of the operation.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let parent = cjson_create_array();
+///     let item = cjson_create_string("Nemuel".to_string()).unwrap();
+///     cjson_add_item_to_array(parent, item).unwrap();
+///     assert_eq!(parent.print().unwrap(), r#"["Nemuel"]"#);
+///
+///     let replacement = cjson_create_string("Wainaina".to_string()).unwrap();
+///     cjson_replace_item_via_pointer(parent, item, replacement);
+///     assert_eq!(parent.print().unwrap(), r#"["Wainaina"]"#);
+///
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_replace_item_via_pointer(
+    parent: *mut Json,
+    item: *mut Json,
+    replacement: *mut Json,
+) -> bool {
+    let result = unsafe {
+        cJSON_ReplaceItemViaPointer(
+            parent as *mut cJSON,
+            item as *mut cJSON,
+            replacement as *mut cJSON,
+        )
+    };
+    if result == 1 {
+        true
+    } else {
+        false
+    }
+}
+
 /// Create a copy of a Json item.
 ///
 /// Args:
