@@ -2347,6 +2347,33 @@ pub fn cjson_replace_item_in_object_case_sensitive(
     }
 }
 
+/// Create a copy of a Json item.
+///
+/// Args:
+/// - `item: *mut Json` - Mutable pointer to the Json item to be duplicated.
+/// - `recurse: bool` - Boolean value specifying whether or not to duplicate nested structures as well.
+///
+/// Returns:
+/// - `*mut Json` - a mutable pointer to the newly created duplicate Json item.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let original = cjson_create_string("Nemuel".to_string()).unwrap();
+///
+///     let copy = cjson_duplicate(original, false);
+///
+///     let result = cjson_compare(original, copy, true);
+///     assert_eq!(result, true);
+///     println!("Test passed");
+/// }
+/// ```
+pub fn cjson_duplicate(item: *mut Json, recurse: bool) -> *mut Json {
+    unsafe { cJSON_Duplicate(item as *const cJSON, if recurse { 1 } else { 0 }) as *mut Json }
+}
+
 /// Check whether 2 Json items are equivalent in structure and value.
 ///
 /// Args:
@@ -2363,9 +2390,9 @@ pub fn cjson_replace_item_in_object_case_sensitive(
 /// use cjson_rs::*;
 ///
 /// fn main() {
-///     let object1 = cjson_create_string("Nemuel".to_string()).unwrap();
-///     let object2 = cjson_create_string("Nemuel".to_string()).unwrap();
-///     let result = cjson_compare(object1, object2, true);
+///     let item1 = cjson_create_string("Nemuel".to_string()).unwrap();
+///     let item2 = cjson_create_string("Nemuel".to_string()).unwrap();
+///     let result = cjson_compare(item1, item2, true);
 ///     assert_eq!(result, true);
 ///     println!("Test passed");
 /// }
