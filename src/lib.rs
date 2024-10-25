@@ -2477,6 +2477,40 @@ pub fn cjson_detach_item_from_object(
     }
 }
 
+/// Detach item from Json item of type `Object`, with a case-sensitive comparison of keys.
+///
+/// Args:
+/// - `object: *mut Json` - Mutable pointer to the Json item of type `Object` from which an item is to
+/// be detached.
+/// - `string: &str` - The key value for the item that is to be detached from the object.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - a mutable pointer to the detached item if the operation happens.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item to be operated on is not of type
+/// `Object`.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string slice contains a null byte.
+pub fn cjson_detach_item_from_object_case_sensitive(
+    object: *mut Json,
+    string: &str,
+) -> Result<*mut Json, JsonError> {
+    if !object.is_type_object() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot detach item from a non-object Json item".to_string(),
+        ));
+    }
+
+    match CString::new(string) {
+        Ok(c_str) => {
+            let detached_item = unsafe {
+                cJSON_DetachItemFromObjectCaseSensitive(object as *mut cJSON, c_str.as_ptr())
+                    as *mut Json
+            };
+            Ok(detached_item)
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
 /// Detach Json item from its parent via pointer (thus maintaining access to the detached item).
 ///
 /// Args:
