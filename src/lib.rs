@@ -14,7 +14,7 @@ pub const CJSON_VERSION_PATCH: u32 = bindings::CJSON_VERSION_PATCH;
 ///
 /// fn main() {
 ///     assert_eq!(cjson_version(), "1.7.18");
-///     println!("Test passed"); // Test passed
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_version() -> String {
@@ -2040,7 +2040,7 @@ pub fn cjson_add_array_to_object(object: *mut Json, name: &str) -> Result<*mut J
 ///         cjson_add_item_to_object(object, "test", test_item).unwrap(),
 ///         true
 ///     );
-///     println!("Test passed"); // Test passed
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_add_item_to_object(
@@ -2092,7 +2092,7 @@ pub fn cjson_add_item_to_object(
 ///         cjson_add_item_reference_to_object(object, "test", test_item).unwrap(),
 ///         true
 ///     );
-///     println!("Test passed"); // Test passed
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_add_item_reference_to_object(
@@ -2148,7 +2148,7 @@ pub fn cjson_add_item_reference_to_object(
 ///         cjson_add_item_to_object_cs(object, "test", test_item).unwrap(),
 ///         true
 ///     );
-///     println!("Test passed"); // Test passed
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_add_item_to_object_cs(
@@ -2326,7 +2326,7 @@ pub fn cjson_get_object_item_case_sensitive(
 ///         "Wainaina"
 ///     );
 ///
-///     println!("Test passed"); // Test passed
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_replace_item_in_object(
@@ -2392,7 +2392,7 @@ pub fn cjson_replace_item_in_object(
 ///         "Wainaina"
 ///     );
 ///
-///     println!("Test passed");
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_replace_item_in_object_case_sensitive(
@@ -2445,7 +2445,7 @@ pub fn cjson_replace_item_in_object_case_sensitive(
 ///
 ///     let result = cjson_compare(original, copy, true);
 ///     assert_eq!(result, true);
-///     println!("Test passed");
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_duplicate(item: *mut Json, recurse: bool) -> *mut Json {
@@ -2472,7 +2472,7 @@ pub fn cjson_duplicate(item: *mut Json, recurse: bool) -> *mut Json {
 ///     let item2 = cjson_create_string("Nemuel".to_string()).unwrap();
 ///     let result = cjson_compare(item1, item2, true);
 ///     assert_eq!(result, true);
-///     println!("Test passed");
+///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_compare(a: *mut Json, b: *mut Json, case_sensitive: bool) -> bool {
