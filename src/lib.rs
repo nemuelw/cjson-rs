@@ -2217,3 +2217,30 @@ pub fn cjson_get_object_item_case_sensitive(
         Err(err) => Err(JsonError::CStringError(err)),
     }
 }
+
+/// Deallocate/free the memory allocated for a Json item along with all its nested structures if any.
+///
+/// NOTE: The pointers to the parent item and all its nested structures (if any) are themselves not
+/// set to NULL, raising a dangling pointers issue.
+///
+/// Args:
+/// - `item: *mut Json` - Mutable pointer to the Json item whose memory is to be deallocated/freed.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let mut object = cjson_create_object();
+///     cjson_add_string_to_object(object, "name", "Nemuel").unwrap();
+///
+///     cjson_delete(&mut object);
+///
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_delete(item: &mut *mut Json) {
+    unsafe {
+        cJSON_Delete(*item as *mut cJSON);
+    }
+}
