@@ -2218,6 +2218,69 @@ pub fn cjson_get_object_item_case_sensitive(
     }
 }
 
+/// Replace item with specified key in Json item of type `Object`.
+///
+/// Args:
+/// - `object: *mut Json` - Json item of type `Object` within which the replacement is to happen.
+/// - `string: &str` - The key of the Json item to be replaced.
+/// - `newitem: *mut Json` - Item replacing the original one.
+///
+/// Returns:
+/// - `Ok(bool)` - a boolean value indicating whether or not the operation was successful.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the Json item being operated on is not of type
+/// `Object`.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string slice contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let object = cjson_create_object();
+///     let original_item = cjson_create_string("Nemuel".to_string()).unwrap();
+///     cjson_add_item_to_object(object, "name", original_item).unwrap();
+///
+///     let new_item = cjson_create_string("Wainaina".to_string()).unwrap();
+///     let result = cjson_replace_item_in_object(object, "name", new_item).unwrap();
+///     assert_eq!(result, true);
+///     assert_eq!(
+///         cjson_get_string_value(cjson_get_object_item(object, "name").unwrap()).unwrap(),
+///         "Wainaina"
+///     );
+///
+///     println!("Test passed"); // Test passed
+/// }
+/// ```
+pub fn cjson_replace_item_in_object(
+    object: *mut Json,
+    string: &str,
+    newitem: *mut Json,
+) -> Result<bool, JsonError> {
+    if !object.is_type_object() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot replace item in a non-array Json item".to_string(),
+        ));
+    }
+
+    match CString::new(string) {
+        Ok(c_str) => {
+            let result = unsafe {
+                cJSON_ReplaceItemInObject(
+                    object as *mut cJSON,
+                    c_str.as_ptr(),
+                    newitem as *mut cJSON,
+                )
+            };
+            if result == 1 {
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
 /// Deallocate/free the memory allocated for a Json item along with all its nested structures if any.
 ///
 /// NOTE: The pointers to the parent item and all its nested structures (if any) are themselves not
