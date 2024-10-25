@@ -2244,3 +2244,35 @@ pub fn cjson_delete(item: &mut *mut Json) {
         cJSON_Delete(*item as *mut cJSON);
     }
 }
+
+/// Deallocate/free the memory allocated for a non-object Json item.
+///
+/// NOTE: The pointer to the Json item is itself not set to NULL, raising a dangling pointer issue.
+///
+/// Args:
+/// - `item: *mut Json` - Mutable pointer to the Json item whose memory is to be deallocated/freed.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+/// 
+/// fn main() {
+///     let array_item = cjson_create_array();
+/// 
+///     cjson_free(array_item).unwrap();
+/// 
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_free(item: *mut Json) -> Result<(), JsonError> {
+    if item.is_type_object() {
+        Err(JsonError::InvalidTypeError(
+            "attempted to free Json item of type Object, use cjson_delete instead".to_string(),
+        ))
+    } else {
+        unsafe {
+            cJSON_free(item as *mut c_void);
+        }
+        Ok(())
+    }
+}
