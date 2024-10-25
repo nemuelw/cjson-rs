@@ -592,6 +592,39 @@ impl JsonPtrExt for *mut Json {
     }
 }
 
+/// Remove all unnecessary whitespace and formatting from a JSON string.
+///
+/// Args:
+/// - `json: String` - The JSON string to be minified.
+///
+/// Returns:
+/// - `Ok(())` - if the operation gets performed.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let mut json_str: String = "{\n\t\"name\": \"Nemuel\",\n\t\"age\": 20\n}".to_string();
+///     cjson_minify(&mut json_str).unwrap();
+///     assert_eq!(json_str, r#"{"name":"Nemuel","age":20}"#);
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_minify(json: &mut String) -> Result<(), JsonError> {
+    match CString::new((*json).as_bytes()) {
+        Ok(c_str) => {
+            let c_str_mut_ptr = c_str.as_ptr() as *mut i8;
+            unsafe { cJSON_Minify(c_str_mut_ptr) };
+            let minified = unsafe { CStr::from_ptr(c_str_mut_ptr) };
+            *json = minified.to_string_lossy().into_owned();
+            Ok(())
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
 /// Parse a JSON string into a Json object.
 ///
 /// Args:
