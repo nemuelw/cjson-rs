@@ -760,6 +760,13 @@ pub fn cjson_parse_json_with_length(
 ///     }
 /// }
 /// ```
+///
+/// Output:
+/// ```json
+/// {
+///     "rps": 500
+/// }
+/// ```
 pub fn cjson_parse_json_with_opts(
     value: &str,
     return_parse_end: &mut *const c_char,
@@ -774,6 +781,76 @@ pub fn cjson_parse_json_with_opts(
             let json = unsafe {
                 cJSON_ParseWithOpts(
                     c_str.as_ptr(),
+                    return_parse_end as *mut *const i8,
+                    if require_null_terminated { 1 } else { 0 },
+                )
+            };
+            if json.is_null() {
+                Err(JsonError::ParseError)
+            } else {
+                Ok(json as *mut Json)
+            }
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
+/// Parse a specific length of a JSON string into a Json object (with additional options).
+///
+/// Args:
+/// - `value: String`: The JSON string to be parsed. Providing an empty string will result in
+/// JsonError::EmptyStringError.
+/// - `buffer_length: usize`: Length of the JSON string to be parsed.
+/// - `return_parse_end: *mut *const char` - Mutable pointer to constant character pointer that will
+/// indicate where parsing ended.
+/// - `require_null_terminated: bool` - Boolean value specifying whether or not the JSON string should be
+/// null terminated.
+///
+/// Returns:
+/// - `Ok(*mut Json)` - if the parsing happens successfully.
+/// - `Err(JsonError::EmptyStringError)` - if the provided `value` string is empty (can't parse an
+/// empty string).
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+/// use core::ffi::c_char;
+///
+/// fn main() {
+///     let value = "{\"rps\":500}";
+///     let mut return_parse_end: *const c_char = std::ptr::null_mut();
+///     match cjson_parse_json_with_length_opts(value, 11, &mut return_parse_end, false) {
+///         Ok(json) => {
+///             println!("{}", json.print().unwrap());
+///         }
+///         Err(err) => eprintln!("{}", err),
+///     }
+/// }
+/// ```
+///
+/// Output:
+/// ```json
+/// {
+///     "rps": 500
+/// }
+/// ```
+pub fn cjson_parse_json_with_length_opts(
+    value: &str,
+    buffer_length: usize,
+    return_parse_end: &mut *const c_char,
+    require_null_terminated: bool,
+) -> Result<*mut Json, JsonError> {
+    if value.is_empty() {
+        return Err(JsonError::EmptyStringError);
+    }
+
+    match CString::new(value) {
+        Ok(c_str) => {
+            let json = unsafe {
+                cJSON_ParseWithLengthOpts(
+                    c_str.as_ptr(),
+                    buffer_length,
                     return_parse_end as *mut *const i8,
                     if require_null_terminated { 1 } else { 0 },
                 )
