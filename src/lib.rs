@@ -915,6 +915,49 @@ pub fn cjson_create_string(string: String) -> Result<*mut Json, JsonError> {
     }
 }
 
+/// Set the string value of a Json item of type `String` to the specified value.
+///
+/// Args:
+/// - `item: *mut Json` - Mutable pointer to Json item of type `String` whose string value is to be set.
+/// - `valuestring: &str` - String slice specifying the value to set for the Json item of type `String`.
+///
+/// Returns:
+/// - `Ok(String)` - if the operation happens successfully.
+/// - `Err(JsonError::InvalidTypeError(String))` - if the provided Json item is not of type `String`.
+/// - `Err(JsonError::CStringError(NulError))` - if the provided string contains a null byte.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let string_item = cjson_create_string("Nemuel".to_string()).unwrap();
+///     assert_eq!(cjson_get_string_value(string_item).unwrap(), "Nemuel");
+///
+///     let new_string_value = cjson_set_value_string(string_item, "Wainaina").unwrap();
+///     assert_eq!(new_string_value, "Wainaina");
+///
+///     assert_eq!(cjson_get_string_value(string_item).unwrap(), "Wainaina");
+///     println!("Test passed"); // output: Test passed
+/// }
+/// ```
+pub fn cjson_set_value_string(object: *mut Json, valuestring: &str) -> Result<String, JsonError> {
+    if !object.is_type_string() {
+        return Err(JsonError::InvalidTypeError(
+            "cannot set string value for a non-string Json item".to_string(),
+        ));
+    }
+
+    match CString::new(valuestring) {
+        Ok(c_str) => {
+            let c_str_ptr = unsafe { cJSON_SetValuestring(object as *mut cJSON, c_str.as_ptr()) };
+            let str = unsafe { CStr::from_ptr(c_str_ptr).to_string_lossy().into_owned() };
+            Ok(str)
+        }
+        Err(err) => Err(JsonError::CStringError(err)),
+    }
+}
+
 /// Create Json item of type `Array`.
 ///
 /// Returns:
