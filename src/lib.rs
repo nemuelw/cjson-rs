@@ -2347,6 +2347,44 @@ pub fn cjson_replace_item_in_object_case_sensitive(
     }
 }
 
+/// Check whether 2 Json items are equivalent in structure and value.
+///
+/// Args:
+/// - `a: *mut Json` - Mutable pointer to the first Json item.
+/// - `b: *mut Json` - Mutable pointer to the second Json item.
+/// - `case_sensitive: bool` - Boolean value specifying whether or not to do case-sensitive comparison
+/// for string values.
+///
+/// Returns:
+/// - `bool` - a boolean value (true or false) indicating whether or not the 2 Json items are equivalent.
+///
+/// Example:
+/// ```rust
+/// use cjson_rs::*;
+///
+/// fn main() {
+///     let object1 = cjson_create_string("Nemuel".to_string()).unwrap();
+///     let object2 = cjson_create_string("Nemuel".to_string()).unwrap();
+///     let result = cjson_compare(object1, object2, true);
+///     assert_eq!(result, true);
+///     println!("Test passed");
+/// }
+/// ```
+pub fn cjson_compare(a: *mut Json, b: *mut Json, case_sensitive: bool) -> bool {
+    let result = unsafe {
+        cJSON_Compare(
+            a as *const cJSON,
+            b as *const cJSON,
+            if case_sensitive { 1 } else { 0 },
+        )
+    };
+    if result == 1 {
+        true
+    } else {
+        false
+    }
+}
+
 /// Deallocate/free the memory allocated for a Json item along with all its nested structures if any.
 ///
 /// NOTE: The pointers to the parent item and all its nested structures (if any) are themselves not
