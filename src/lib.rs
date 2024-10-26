@@ -13,14 +13,14 @@ pub const CJSON_VERSION_PATCH: u32 = bindings::CJSON_VERSION_PATCH;
 /// use cjson_rs::cjson_version;
 ///
 /// fn main() {
-///     assert_eq!(cjson_version(), "1.7.18");
+///     assert_eq!(cjson_version(), "1.7.17");
 ///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
 pub fn cjson_version() -> String {
-    let cjson_version = unsafe { cJSON_Version() };
+    let version = unsafe { cJSON_Version() };
     unsafe {
-        CStr::from_ptr(cjson_version)
+        CStr::from_ptr(version)
             .to_str()
             .unwrap_or_default()
             .to_string()
@@ -32,16 +32,6 @@ pub fn cjson_version() -> String {
 /// Fields:
 /// - `malloc_fn`: Optional function pointer for custom memory allocation.
 /// - `free_fn`: Optional function pointer for custom memory deallocation.
-///
-/// To create a new instance of `Hooks`, use its `new` method:
-/// ```rust
-/// let hooks = Hooks::new(Some(custom_malloc), Some(custom_free));
-/// ```
-///
-/// To initialize hooks, use its `init` method:
-/// ```rust
-/// hooks.init();
-/// ```
 pub struct Hooks {
     pub malloc_fn: Option<fn(sz: usize) -> *mut libc::c_void>,
     pub free_fn: Option<fn(*mut libc::c_void)>,
@@ -119,8 +109,23 @@ impl Hooks {
     ///
     /// Usage:
     /// ```rust
-    /// let hooks = Hooks::new(Some(custom_malloc), Some(custom_free));
-    /// hooks.init();
+    /// use cjson_rs::Hooks;
+    /// use libc::{malloc, free};
+    ///
+    /// fn custom_malloc(size: usize) -> *mut libc::c_void {
+    ///     println!("allocating memory ...");
+    ///     unsafe { malloc(size) }
+    /// }
+    ///
+    /// fn custom_free(ptr: *mut libc::c_void) {
+    ///    println!("freeing memory ...");
+    ///    unsafe { free(ptr); }
+    /// }
+    ///
+    /// fn main() {
+    ///     let hooks = Hooks::new(Some(custom_malloc), Some(custom_free)); //
+    ///     hooks.init();
+    /// }
     /// ```
     pub fn init(&self) {
         unsafe {
@@ -643,7 +648,7 @@ pub fn cjson_minify(json: &mut String) -> Result<(), JsonError> {
 ///
 /// fn main() {
 ///     let value  = "{\"name\":\"Nemuel\", \"age\":20}".to_string();
-///     match parse_json(value) {
+///     match cjson_parse_json(value) {
 ///         Ok(json) => println!("{}", json.print().unwrap()),
 ///         Err(err) => eprintln!("{}", err),
 ///     }
@@ -694,7 +699,7 @@ pub fn cjson_parse_json(value: String) -> Result<*mut Json, JsonError> {
 ///
 /// fn main() {
 ///     let value = "{\"rps\":500} more text".to_string();
-///     match parse_json_with_length(value, 11) {
+///     match cjson_parse_json_with_length(value, 11) {
 ///         Ok(json) => println!("{}", json.print().unwrap()),
 ///         Err(err) => eprintln!("{}", err),
 ///     }
@@ -934,7 +939,7 @@ pub fn cjson_create_null() -> *mut Json {
 /// use cjson_rs::{cjson_create_object, Json};
 ///
 /// fn main() {
-///     let json: *mut Json = cjson_cjson_create_object();
+///     let json: *mut Json = cjson_create_object();
 /// }
 /// ```
 pub fn cjson_create_object() -> *mut Json {
