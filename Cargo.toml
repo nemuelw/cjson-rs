@@ -1,6 +1,8 @@
 [package]
 name = "cjson-rs"
-version = "0.2.1"
+description = "Rust bindings for the cJSON library"
+license = "MIT"
+version = "0.2.2"
 edition = "2021"
 
 [build-dependencies]
