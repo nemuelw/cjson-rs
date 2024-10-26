@@ -2,13 +2,16 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    if pkg_config::probe_library("cjson").is_err() {
-        panic!("Could not find the cJSON library");
-    }
+    let include_path =
+        env::var("CJSON_INCLUDE_PATH").expect("Environment variable CJSON_INCLUDE_PATH not found");
+    let lib_path =
+        env::var("CJSON_LIB_PATH").expect("Environment variable CJSON_LIB_PATH not found");
+
+    println!("cargo:rustc-link-search={}", lib_path);
     println!("cargo:rustc-link-lib=cjson");
 
     let bindings = bindgen::Builder::default()
-        .header("wrapper.h")
+        .header(format!("{}/cJSON.h", include_path))
         .generate()
         .expect("Unable to generate bindings");
 
