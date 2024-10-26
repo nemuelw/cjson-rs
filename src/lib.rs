@@ -10,10 +10,13 @@ pub const CJSON_VERSION_PATCH: u32 = bindings::CJSON_VERSION_PATCH;
 ///
 /// Example:
 /// ```rust
-/// use cjson_rs::cjson_version;
+/// use cjson_rs::*;
 ///
 /// fn main() {
-///     assert_eq!(cjson_version(), "1.7.17");
+///     assert_eq!(
+///         cjson_version(), 
+///         format!("{}.{}.{}", CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH)
+///     );
 ///     println!("Test passed"); // output: Test passed
 /// }
 /// ```
