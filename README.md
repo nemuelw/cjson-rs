@@ -21,3 +21,21 @@ Make sure you have the [cJSON](https://github.com/DaveGamble/cJSON) library prop
     ```rust
     use cjson_rs::*;
     ```
+
+## Documentation
+
+For detailed documentation, please refer to the documentation comments in the code. You can view it even
+better in your browser by running this command in the `cjson-rs` project directory:
+
+```bash
+cargo doc --open
+```
+
+## Contributing
+
+Contributions are much welcome! Feel free to open issues or create pull requests to contribute to this
+project.
+
+## License
+
+This project is licensed under the MIT license.
