@@ -10,13 +10,13 @@ Make sure you have the [cJSON](https://github.com/DaveGamble/cJSON) library prop
   - `CJSON_INCLUDE_PATH` specifies where the compiler should look for the `cJSON.h` header file during the compilation process eg. `/usr/include/cjson`.
   - `CJSON_LIB_PATH` specifies where the linker should look for precompiled cJSON library files eg. `/usr/local/lib`.
 
-- Update your `Cargo.toml` file:
+- Update your `Cargo.toml` file by adding this to the `[dependencies]` section:
 
     ```toml
-    cjson-rs = "0.1.0"
+    cjson-rs = "0.2.3"
     ```
 
-- Import the crate to start using it:
+- Import the crate in your source file(s) to start using it:
 
     ```rust
     use cjson_rs::*;

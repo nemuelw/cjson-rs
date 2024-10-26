@@ -2,7 +2,7 @@
 name = "cjson-rs"
 description = "Rust bindings for the cJSON library"
 license = "MIT"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 
 [build-dependencies]

@@ -14,7 +14,7 @@ pub const CJSON_VERSION_PATCH: u32 = bindings::CJSON_VERSION_PATCH;
 ///
 /// fn main() {
 ///     assert_eq!(
-///         cjson_version(), 
+///         cjson_version(),
 ///         format!("{}.{}.{}", CJSON_VERSION_MAJOR, CJSON_VERSION_MINOR, CJSON_VERSION_PATCH)
 ///     );
 ///     println!("Test passed"); // output: Test passed
